@@ -25,7 +25,8 @@ export class PlayerController {
       maxEmpEnergy: 100,
       empReady: false,
       invulnerableTimer: 0,
-      thrustTrailTimer: 0
+      thrustTrailTimer: 0,
+      overdriveTimer: 0
     };
   }
 
@@ -40,6 +41,7 @@ export class PlayerController {
     this.player.empReady = false;
     this.player.invulnerableTimer = 0;
     this.player.thrustTrailTimer = 0;
+    this.player.overdriveTimer = 0;
   }
 
   public update(
@@ -49,13 +51,22 @@ export class PlayerController {
     vfx: VFXManager,
     audio: SoundEngine
   ): { timeScale: number; empTriggered: boolean } {
+    // Overdrive decay and bonus
+    const isOverdrive = this.player.overdriveTimer > 0;
+    if (isOverdrive) {
+      this.player.overdriveTimer -= rawDt;
+      this.player.chronoEnergy = this.player.maxChronoEnergy;
+    }
+
     // Determine Chronoshift activation
-    const wantsChrono = (input.chrono || input.isPointerActive) && this.player.chronoEnergy > 5;
+    const wantsChrono = (input.chrono || input.isPointerActive || isOverdrive) && (this.player.chronoEnergy > 5 || isOverdrive);
     const previouslyActive = this.player.isChronoActive;
 
     if (wantsChrono) {
       this.player.isChronoActive = true;
-      this.player.chronoEnergy = Math.max(0, this.player.chronoEnergy - 28 * rawDt);
+      if (!isOverdrive) {
+        this.player.chronoEnergy = Math.max(0, this.player.chronoEnergy - 28 * rawDt);
+      }
       if (this.player.chronoEnergy <= 0) {
         this.player.isChronoActive = false;
       }
@@ -149,6 +160,18 @@ export class PlayerController {
     this.player.empEnergy = Math.min(this.player.maxEmpEnergy, this.player.empEnergy + bonusEmp);
     vfx.spawnSparks(this.player.pos, 5, '#ffff00', 120);
     audio.playGraze();
+  }
+
+  public heal(amount = 1): boolean {
+    if (this.player.health < this.player.maxHealth) {
+      this.player.health = Math.min(this.player.maxHealth, this.player.health + amount);
+      return true;
+    }
+    return false;
+  }
+
+  public activateOverdrive(duration = 5.0): void {
+    this.player.overdriveTimer = duration;
   }
 
   public takeHit(vfx: VFXManager, audio: SoundEngine): boolean {

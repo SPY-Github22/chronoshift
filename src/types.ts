@@ -21,6 +21,7 @@ export interface Player {
   empReady: boolean;
   invulnerableTimer: number;
   thrustTrailTimer: number;
+  overdriveTimer: number;
 }
 
 export type HazardType = 'ORB' | 'LASER' | 'SEEKER' | 'PULSAR';
@@ -80,6 +81,19 @@ export interface EnergyCore {
   radius: number;
   pulsePhase: number;
   value: number;
+  markedForRemoval: boolean;
+}
+
+export type PowerUpType = 'SHIELD' | 'OVERDRIVE' | 'NUKE';
+
+export interface PowerUpItem {
+  id: number;
+  type: PowerUpType;
+  pos: Vector2D;
+  vel: Vector2D;
+  radius: number;
+  pulsePhase: number;
+  duration: number;
   markedForRemoval: boolean;
 }
 

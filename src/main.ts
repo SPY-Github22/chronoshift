@@ -287,7 +287,7 @@ class ChronoshiftGame {
       }
 
       // Update hazards & collisions
-      const { hits, grazes, coresCollected } = this.hazardDirector.update(
+      const { hits, grazes, coresCollected, collectedPowerUps } = this.hazardDirector.update(
         scaledDt,
         rawDt,
         this.state.stats.wave,
@@ -296,6 +296,24 @@ class ChronoshiftGame {
         this.vfx,
         sound
       );
+
+      // Handle Powerups
+      for (const p of collectedPowerUps) {
+        if (p === 'SHIELD') {
+          const healed = this.playerCtrl.heal(1);
+          sound.playShieldRestored();
+          this.vfx.spawnFloatingText(healed ? '+1 SHIELD RESTORED!' : 'SHIELD OVERCHARGED!', this.playerCtrl.player.pos, '#00ff88', 1.3);
+        } else if (p === 'OVERDRIVE') {
+          this.playerCtrl.activateOverdrive(6.0);
+          this.vfx.spawnFloatingText('OVERDRIVE ACTIVE (6s)!', this.playerCtrl.player.pos, '#ff00bb', 1.5);
+          this.vfx.triggerScreenShake(7, 0.3);
+        } else if (p === 'NUKE') {
+          this.state.recordEmpActivation();
+          const destroyed = this.hazardDirector.destroyAllHazards(this.vfx, sound);
+          this.state.addScore(destroyed * 1200);
+          this.vfx.spawnFloatingText(`TACTICAL NUKE PURGE!`, this.playerCtrl.player.pos, '#ffaa00', 1.6);
+        }
+      }
 
       // Handle Grazes
       for (let i = 0; i < grazes; i++) {

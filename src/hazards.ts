@@ -1,4 +1,4 @@
-import { EnergyCore, Hazard, LaserHazard, OrbHazard, Player, PulsarHazard, SeekerHazard, Vector2D } from './types';
+import { EnergyCore, Hazard, LaserHazard, OrbHazard, Player, PowerUpItem, PowerUpType, PulsarHazard, SeekerHazard, Vector2D } from './types';
 import { circleCircleCollision, circleSegmentCollision, clamp, isNearMissGraze, randomRange, vecAdd, vecCreate, vecDistance, vecFromAngle, vecNormalize, vecScale, vecSub } from './math';
 import { VFXManager } from './particles';
 import { SoundEngine } from './audio';
@@ -6,17 +6,21 @@ import { SoundEngine } from './audio';
 export class HazardDirector {
   public hazards: Hazard[] = [];
   public cores: EnergyCore[] = [];
+  public powerups: PowerUpItem[] = [];
   private nextId = 1;
   private spawnTimer = 0;
   private laserTimer = 0;
   private coreTimer = 0;
+  private powerupTimer = 0;
 
   public reset(): void {
     this.hazards = [];
     this.cores = [];
+    this.powerups = [];
     this.spawnTimer = 0;
     this.laserTimer = 0;
     this.coreTimer = 0;
+    this.powerupTimer = 0;
   }
 
   public update(
@@ -27,10 +31,11 @@ export class HazardDirector {
     bounds: { width: number; height: number },
     vfx: VFXManager,
     audio: SoundEngine
-  ): { hits: number; grazes: number; coresCollected: number } {
+  ): { hits: number; grazes: number; coresCollected: number; collectedPowerUps: PowerUpType[] } {
     let hits = 0;
     let grazes = 0;
     let coresCollected = 0;
+    const collectedPowerUps: PowerUpType[] = [];
 
     // 1. Spawning Director based on wave
     this.spawnTimer += scaledDt;
@@ -60,6 +65,13 @@ export class HazardDirector {
     if (this.coreTimer >= 4.0 && this.cores.length < 5) {
       this.coreTimer = 0;
       this.spawnCore(bounds);
+    }
+
+    // Power-up spawning (every ~14s)
+    this.powerupTimer += scaledDt;
+    if (this.powerupTimer >= 14.0 && this.powerups.length < 2) {
+      this.powerupTimer = 0;
+      this.spawnPowerUp(bounds);
     }
 
     // 2. Update Hazards
@@ -199,7 +211,32 @@ export class HazardDirector {
       }
     }
 
-    return { hits, grazes, coresCollected };
+    // 5. Update PowerUps
+    for (let i = this.powerups.length - 1; i >= 0; i--) {
+      const p = this.powerups[i];
+      p.pulsePhase += realDt * 5.0;
+      p.duration -= realDt;
+      p.pos.x += p.vel.x * realDt;
+      p.pos.y += p.vel.y * realDt;
+
+      // Magnetic attraction
+      const dist = vecDistance(player.pos, p.pos);
+      if (dist < 100) {
+        const pullDir = vecNormalize(vecSub(player.pos, p.pos));
+        p.vel = vecAdd(p.vel, vecScale(pullDir, 350 * realDt));
+      }
+
+      if (circleCircleCollision(player.pos, player.radius, p.pos, p.radius)) {
+        collectedPowerUps.push(p.type);
+        vfx.spawnSparks(p.pos, 22, p.type === 'SHIELD' ? '#00ff88' : p.type === 'OVERDRIVE' ? '#ff00bb' : '#ffaa00', 180);
+        vfx.spawnFloatingText(`POWERUP: ${p.type}!`, p.pos, '#ffffff', 1.3);
+        this.powerups.splice(i, 1);
+      } else if (p.duration <= 0) {
+        this.powerups.splice(i, 1);
+      }
+    }
+
+    return { hits, grazes, coresCollected, collectedPowerUps };
   }
 
   public destroyAllHazards(vfx: VFXManager, audio: SoundEngine): number {
@@ -335,6 +372,21 @@ export class HazardDirector {
     });
   }
 
+  private spawnPowerUp(bounds: { width: number; height: number }): void {
+    const types: PowerUpType[] = ['SHIELD', 'OVERDRIVE', 'NUKE'];
+    const type = types[Math.floor(Math.random() * types.length)];
+    this.powerups.push({
+      id: this.nextId++,
+      type,
+      pos: vecCreate(randomRange(60, bounds.width - 60), randomRange(60, bounds.height - 60)),
+      vel: vecCreate(randomRange(-10, 10), randomRange(-10, 10)),
+      radius: 10,
+      pulsePhase: 0,
+      duration: 10.0,
+      markedForRemoval: false
+    });
+  }
+
   public render(ctx: CanvasRenderingContext2D): void {
     ctx.save();
 
@@ -425,6 +477,28 @@ export class HazardDirector {
       ctx.rotate(core.pulsePhase);
       ctx.fillStyle = '#ffffff';
       ctx.fillRect(-core.radius * 0.4, -core.radius * 0.4, core.radius * 0.8, core.radius * 0.8);
+      ctx.restore();
+    }
+
+    // 3. Render PowerUps
+    for (const p of this.powerups) {
+      const pulse = Math.sin(p.pulsePhase) * 3;
+      const color = p.type === 'SHIELD' ? '#00ff88' : p.type === 'OVERDRIVE' ? '#ff00bb' : '#ffbb00';
+      ctx.beginPath();
+      ctx.arc(p.pos.x, p.pos.y, p.radius + pulse, 0, Math.PI * 2);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2.5;
+      ctx.shadowBlur = 16;
+      ctx.shadowColor = color;
+      ctx.stroke();
+
+      ctx.save();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 10px monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const label = p.type === 'SHIELD' ? '+' : p.type === 'OVERDRIVE' ? '∞' : '☢';
+      ctx.fillText(label, p.pos.x, p.pos.y);
       ctx.restore();
     }
 
