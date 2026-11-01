@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chronoshift: Neon Overdrive</title>
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="game-canvas" width="960" height="640"></canvas>
+    <div id="scanlines"></div>
+
+    <div id="hud">
+      <div class="hud-panel">
+        <div>SCORE: <span id="hud-score">0</span></div>
+        <div>HIGH: <span id="hud-high">0</span></div>
+        <div>WAVE: <span id="hud-wave">1</span></div>
+      </div>
+      <div class="hud-panel" style="align-items: center;">
+        <div id="hud-multiplier" style="font-size: 20px; color: #ff00aa;">1x MULTIPLIER</div>
+        <div id="hud-combo-bar" style="font-size: 11px; color: #8899aa;">GRAZE HAZARDS TO COMBO</div>
+      </div>
+      <div class="hud-panel" style="align-items: flex-end;">
+        <div>SHIELDS: <span id="hud-health">♥♥♥</span></div>
+        <div class="meter-container">
+          <span>CHRONO:</span>
+          <div class="meter-bar"><div id="meter-chrono" class="meter-fill-chrono"></div></div>
+        </div>
+        <div class="meter-container">
+          <span>EMP BLAST:</span>
+          <div class="meter-bar"><div id="meter-emp" class="meter-fill-emp"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="overlay">
+      <h1 id="overlay-title">CHRONOSHIFT</h1>
+      <p class="subtitle" id="overlay-subtitle">NEON OVERDRIVE</p>
+      <button id="start-btn" class="btn-primary">START OVERDRIVE</button>
+      <div class="controls-hint">
+        [WASD / ARROWS] Move Ship &nbsp;|&nbsp; [SPACE / RIGHT CLICK] Chronoshift (Slow-Mo)<br />
+        [E / LEFT CLICK] EMP Blast (When Charged) &nbsp;|&nbsp; [M] Toggle Audio
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.ts"></script>
+</body>
+</html>
