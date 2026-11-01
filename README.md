@@ -1,29 +1,59 @@
 # Chronoshift: Neon Overdrive ⚡
 
-An adrenaline-pumping, retro-cyberpunk arcade evasion game where time bends to your will.
+[![Play Game](https://img.shields.io/badge/Play%20Live-GitHub%20Pages-00f3ff?style=for-the-badge&logo=github)](https://spy-github22.github.io/chronoshift/)
+[![Build & Deploy](https://github.com/SPY-Github22/chronoshift/actions/workflows/deploy.yml/badge.svg)](https://github.com/SPY-Github22/chronoshift/actions/workflows/deploy.yml)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-## 🎮 Gameplay
-- **Chrono Dilation (Bullet Time)**: Hold `Space` or `Right-Click` to dilate time down to 20% speed.
-- **Graze System**: Brush dangerously close to lethal hazards to recharge your Chrono Capacitor and multiply your score combo up to 16x.
-- **EMP Cascade**: Trigger EMP shockwaves by collecting overloaded cores, vaporizing nearby hazards in explosive chain reactions.
-- **Procedural Synth Engine**: 100% in-engine audio synthesis powered by Web Audio API — retro leads, punchy bass, laser sweeps, and dynamic audio feedback.
+> **🎮 Live Playable Game:** [https://spy-github22.github.io/chronoshift/](https://spy-github22.github.io/chronoshift/)
+
+An adrenaline-pumping, retro-cyberpunk arcade evasion game where time bends to your will. Dodge phase lasers, homing missiles, and cosmic pulsars in dilated slow-motion while racking up explosive combo multipliers.
+
+---
+
+## 🕹️ Core Game Mechanics
+
+- **⚡ Chrono Dilation (Bullet Time)**: Hold `Space` or `Right-Click` to dilate time to 22% speed. Time slows down around you while maintaining snappy ship control.
+- **🎯 Near-Miss Graze System**: Brush dangerously close to lethal hazards without taking a hit to recharge your Chrono Capacitor and build combo multipliers (up to **16x**!).
+- **💥 Tactical EMP Shockwave**: Graze hazards and collect magnetic energy cores to charge your EMP battery. When full, unleash a screen-clearing pulse that vaporizes hazards for cascade points.
+- **🎁 Tactical Power-Up Drops**:
+  - **🛡️ Shield Repair (`+`)**: Restores 1 lost shield heart.
+  - **⚡ Chrono Overdrive (`∞`)**: 6 seconds of continuous, zero-drain bullet time.
+  - **☢️ Tactical Nuke (`☢`)**: Instantly purges all hazards with massive bonus points.
+- **🎵 In-Engine Procedural Audio Synth**: Zero external sound files! Powered completely by the Web Audio API with a dynamic 16-step Synthwave BGM, lowpass filter dilation on slow-mo, retro chiptune leads, and punchy FM bass kicks.
+- **📱 Responsive & Touch Ready**: Full keyboard/mouse controls on desktop and on-screen dual touch buttons on mobile/tablet.
+
+---
 
 ## 🚀 Controls
-- **WASD / Arrow Keys**: Move Ship
-- **Spacebar / Right-Click**: Activate Chrono-Shift (Slow-Motion)
-- **E / Left-Click**: Trigger Overcharged EMP (when ready)
-- **M**: Mute/Unmute Audio
-- **P / Esc**: Pause Game
 
-## 🛠️ Tech Stack
-- **Engine**: TypeScript 5 + Vite
-- **Renderer**: High-performance Canvas 2D with particle physics & CRT scanlines
-- **Audio**: Procedural Web Audio API synthesizer
-- **Testing & Quality**: Vitest + strict TypeScript compiler checks
+| Action | Desktop (Keyboard & Mouse) | Mobile & Tablet (Touch) |
+|---|---|---|
+| **Move Ship** | `W`, `A`, `S`, `D` or Arrow Keys / Mouse Track | Drag anywhere on screen |
+| **Chrono-Shift (Slow-Mo)** | `Space` or Right-Click | Tap/Hold `⚡ SLOW-MO` button (or 2-finger touch) |
+| **EMP Blast** | `E` or Left-Click (when charged) | Tap `💥 EMP BLAST` button |
+| **Toggle Audio** | `M` or click HUD Audio Button | Tap `🔊 AUDIO` button |
 
-## 📦 Getting Started
+---
+
+## 🛠️ Tech Stack & Architecture
+
+- **Language & Runtime**: TypeScript 5 with strict compilation (`noEmit`, strict nulls, unused locals checking)
+- **Bundler & Dev Server**: Vite 5
+- **Unit Testing**: Vitest test runner (covering vector algebra, collision geometry, and grazing logic)
+- **Graphics**: Hardware-accelerated HTML5 Canvas 2D with particle pooling, screen-shake impulse physics, and retro CRT scanline styling
+- **Audio Engine**: Embedded Web Audio API procedural synthesizer (oscillators, biquad filter sweeps, and noise buffers)
+- **CI/CD**: GitHub Actions workflow automatically testing, building, and deploying directly to GitHub Pages on every push to `main`
+
+---
+
+## 📦 Local Development
 
 ```bash
+# Clone the repository
+git clone https://github.com/SPY-Github22/chronoshift.git
+cd chronoshift
+
 # Install dependencies
 npm install
 
@@ -33,9 +63,11 @@ npm run dev
 # Run unit tests
 npm test
 
-# Build for production
+# Production build and typecheck
 npm run build
 ```
 
+---
+
 ## 📜 License
-MIT
+Distributed under the MIT License. Built with ❤️.
