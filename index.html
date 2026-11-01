@@ -22,7 +22,10 @@
         <div id="hud-combo-bar" style="font-size: 11px; color: #8899aa;">GRAZE HAZARDS TO COMBO</div>
       </div>
       <div class="hud-panel" style="align-items: flex-end;">
-        <div>SHIELDS: <span id="hud-health">♥♥♥</span></div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button id="mute-btn" class="hud-btn">🔊 AUDIO [M]</button>
+          <div>SHIELDS: <span id="hud-health">♥♥♥</span></div>
+        </div>
         <div class="meter-container">
           <span>CHRONO:</span>
           <div class="meter-bar"><div id="meter-chrono" class="meter-fill-chrono"></div></div>
@@ -32,6 +35,12 @@
           <div class="meter-bar"><div id="meter-emp" class="meter-fill-emp"></div></div>
         </div>
       </div>
+    </div>
+
+    <!-- On-screen mobile/touch trigger buttons -->
+    <div id="touch-controls">
+      <button id="touch-chrono-btn" class="touch-btn">⚡ SLOW-MO</button>
+      <button id="touch-emp-btn" class="touch-btn">💥 EMP BLAST</button>
     </div>
 
     <div id="overlay">

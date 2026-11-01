@@ -171,6 +171,39 @@ class ChronoshiftGame {
       }
     });
 
+    // Touch & HUD controls
+    const muteBtn = document.getElementById('mute-btn');
+    if (muteBtn) {
+      muteBtn.addEventListener('click', () => {
+        const isMuted = sound.toggleMute();
+        muteBtn.innerText = isMuted ? '🔇 MUTED' : '🔊 AUDIO [M]';
+      });
+    }
+
+    const touchChronoBtn = document.getElementById('touch-chrono-btn');
+    if (touchChronoBtn) {
+      touchChronoBtn.addEventListener('touchstart', (e) => {
+        this.input.chrono = true;
+        e.preventDefault();
+      });
+      touchChronoBtn.addEventListener('touchend', (e) => {
+        this.input.chrono = false;
+        e.preventDefault();
+      });
+    }
+
+    const touchEmpBtn = document.getElementById('touch-emp-btn');
+    if (touchEmpBtn) {
+      touchEmpBtn.addEventListener('touchstart', (e) => {
+        this.input.triggerEmp = true;
+        e.preventDefault();
+      });
+      touchEmpBtn.addEventListener('touchend', (e) => {
+        this.input.triggerEmp = false;
+        e.preventDefault();
+      });
+    }
+
     this.startBtn.addEventListener('click', () => {
       this.startGame();
     });
