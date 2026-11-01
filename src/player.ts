@@ -26,7 +26,9 @@ export class PlayerController {
       empReady: false,
       invulnerableTimer: 0,
       thrustTrailTimer: 0,
-      overdriveTimer: 0
+      overdriveTimer: 0,
+      frostLevel: 0,
+      isFrozenStiff: false
     };
   }
 
@@ -42,6 +44,8 @@ export class PlayerController {
     this.player.invulnerableTimer = 0;
     this.player.thrustTrailTimer = 0;
     this.player.overdriveTimer = 0;
+    this.player.frostLevel = 0;
+    this.player.isFrozenStiff = false;
   }
 
   public update(
@@ -49,8 +53,21 @@ export class PlayerController {
     input: InputState,
     bounds: { width: number; height: number },
     vfx: VFXManager,
-    audio: SoundEngine
+    audio: SoundEngine,
+    isSubZero = false
   ): { timeScale: number; empTriggered: boolean } {
+    // Thermal & Frost accumulation in Sub-Zero environments
+    if (isSubZero) {
+      this.player.frostLevel = Math.min(100, this.player.frostLevel + 8.5 * rawDt);
+      if (this.player.isChronoActive) {
+        this.player.frostLevel = Math.max(0, this.player.frostLevel - 35 * rawDt);
+      }
+      this.player.isFrozenStiff = this.player.frostLevel >= 95;
+    } else {
+      this.player.frostLevel = 0;
+      this.player.isFrozenStiff = false;
+    }
+
     // Overdrive decay and bonus
     const isOverdrive = this.player.overdriveTimer > 0;
     if (isOverdrive) {
@@ -107,13 +124,19 @@ export class PlayerController {
     }
 
     if (vecLength(moveDir) > 0) {
-      const accel = vecScale(moveDir, this.acceleration * rawDt);
+      const accel = vecScale(moveDir, (this.player.isFrozenStiff ? this.acceleration * 0.55 : this.acceleration) * rawDt);
       this.player.vel = vecAdd(this.player.vel, accel);
 
-      // Clamp max speed
+      // Clamp max speed (sluggish if frozen stiff)
+      const allowedMaxSpeed = this.player.isFrozenStiff ? this.maxSpeed * 0.58 : this.maxSpeed;
       const curSpeed = vecLength(this.player.vel);
-      if (curSpeed > this.maxSpeed) {
-        this.player.vel = vecScale(vecNormalize(this.player.vel), this.maxSpeed);
+      if (curSpeed > allowedMaxSpeed) {
+        this.player.vel = vecScale(vecNormalize(this.player.vel), allowedMaxSpeed);
+      }
+
+      // High-speed kinetic friction dissipates frost
+      if (isSubZero && curSpeed > 160) {
+        this.player.frostLevel = Math.max(0, this.player.frostLevel - 14 * rawDt);
       }
 
       // Thruster trail particles
@@ -121,7 +144,7 @@ export class PlayerController {
       if (this.player.thrustTrailTimer >= 0.04) {
         this.player.thrustTrailTimer = 0;
         const trailPos = vecAdd(this.player.pos, vecScale(vecNormalize(this.player.vel), -12));
-        vfx.spawnSparks(trailPos, 2, '#00f3ff', 50);
+        vfx.spawnSparks(trailPos, 2, this.player.isFrozenStiff ? '#74ebd5' : '#00f3ff', 50);
       }
     } else {
       // Natural inertia drag
@@ -147,6 +170,8 @@ export class PlayerController {
       empTriggered = true;
       this.player.empEnergy = 0;
       this.player.empReady = false;
+      this.player.frostLevel = 0;
+      this.player.isFrozenStiff = false;
       vfx.spawnShockwave(this.player.pos, Math.max(bounds.width, bounds.height), '#ff0055', 8);
       vfx.triggerScreenShake(14, 0.45);
       audio.playEmpBlast();
@@ -158,6 +183,9 @@ export class PlayerController {
   public onGraze(bonusChrono: number, bonusEmp: number, vfx: VFXManager, audio: SoundEngine): void {
     this.player.chronoEnergy = Math.min(this.player.maxChronoEnergy, this.player.chronoEnergy + bonusChrono);
     this.player.empEnergy = Math.min(this.player.maxEmpEnergy, this.player.empEnergy + bonusEmp);
+    // Kinetic heat from graze melts frost
+    this.player.frostLevel = Math.max(0, this.player.frostLevel - 25);
+    this.player.isFrozenStiff = this.player.frostLevel >= 95;
     vfx.spawnSparks(this.player.pos, 5, '#ffff00', 120);
     audio.playGraze();
   }
@@ -228,6 +256,21 @@ export class PlayerController {
     ctx.shadowBlur = 12;
     ctx.shadowColor = isChronoActive ? '#ff00aa' : '#00f3ff';
     ctx.stroke();
+
+    // Frost Glaze Overlay
+    if (this.player.frostLevel > 0) {
+      const frostAlpha = Math.min(0.85, (this.player.frostLevel / 100) * 0.9);
+      ctx.fillStyle = `rgba(116, 235, 213, ${frostAlpha})`;
+      ctx.shadowBlur = 14;
+      ctx.shadowColor = '#4deeea';
+      ctx.fill();
+
+      if (this.player.isFrozenStiff) {
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+    }
 
     ctx.restore();
   }

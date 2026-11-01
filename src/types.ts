@@ -22,6 +22,8 @@ export interface Player {
   invulnerableTimer: number;
   thrustTrailTimer: number;
   overdriveTimer: number;
+  frostLevel: number;
+  isFrozenStiff: boolean;
 }
 
 export type HazardType = 'ORB' | 'LASER' | 'SEEKER' | 'PULSAR';

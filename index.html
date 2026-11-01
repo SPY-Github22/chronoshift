@@ -35,6 +35,10 @@
           <span>EMP BLAST:</span>
           <div class="meter-bar"><div id="meter-emp" class="meter-fill-emp"></div></div>
         </div>
+        <div id="container-frost" class="meter-container" style="display: none;">
+          <span style="color: #74ebd5;">FROST:</span>
+          <div class="meter-bar"><div id="meter-frost" class="meter-fill-frost"></div></div>
+        </div>
       </div>
     </div>
 
@@ -48,9 +52,10 @@
       <h1 id="overlay-title">CHRONOSHIFT</h1>
       <p class="subtitle" id="overlay-subtitle">NEON OVERDRIVE</p>
 
-      <div id="sector-select-group" style="display: flex; gap: 12px; margin-bottom: 20px;">
+      <div id="sector-select-group" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center;">
         <button id="sector-1-btn" class="sector-btn sector-btn-active">SECTOR 1: FIREWALL PERIMETER</button>
-        <button id="sector-2-btn" class="sector-btn">SECTOR 2: THE QUANTUM FOUNDRY [LEVEL 2]</button>
+        <button id="sector-2-btn" class="sector-btn">SECTOR 2: THE QUANTUM FOUNDRY</button>
+        <button id="sector-3-btn" class="sector-btn">SECTOR 3: SUB-ZERO NULL ZONE [LEVEL 3]</button>
       </div>
 
       <button id="start-btn" class="btn-primary">LAUNCH MISSION</button>

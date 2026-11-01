@@ -244,3 +244,11 @@ p.subtitle {
   color: #00f3ff;
   box-shadow: 0 0 14px rgba(0, 243, 255, 0.5);
 }
+
+.meter-fill-frost {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #4deeea, #ffffff);
+  box-shadow: 0 0 8px #74ebd5;
+  transition: width 0.05s ease-out;
+}

@@ -90,6 +90,68 @@ export const STORY_SCRIPTS: Record<string, DialogueMessage[]> = {
       color: '#00f3ff',
       duration: 5.0
     }
+  ],
+  SECTOR3_NULL_START: [
+    {
+      id: 's3_intro_1',
+      sender: 'ECHO',
+      tag: 'ECHO // CRYOGENIC ALERT',
+      text: 'Vanguard, temperatures dropping to 0 Kelvin. Welcome to Sector 3: The Sub-Zero Null Zone.',
+      color: '#4deeea',
+      duration: 4.5
+    },
+    {
+      id: 's3_intro_2',
+      sender: 'ECHO',
+      tag: 'ECHO // TACTICAL',
+      text: 'Chrono-Shift will flash-freeze incoming projectiles into crystal shards! Shatter them with EMP for explosive cascade combos!',
+      color: '#74ebd5',
+      duration: 5.0
+    },
+    {
+      id: 's3_intro_3',
+      sender: 'KIRA',
+      tag: 'VESPER-01 // KIRA',
+      text: 'Copy that. Keeping thrusters at high velocity to melt the frost. Let us break the ice.',
+      color: '#00ff88',
+      duration: 4.0
+    }
+  ],
+  CRYO_BOSS_SPAWN: [
+    {
+      id: 'cryo_alert_1',
+      sender: 'APEX',
+      tag: 'A.P.E.X. // STASIS CORE',
+      text: 'ENTROPIC EQUILIBRIUM MANDATES COMPLETE COLD. CRYO-ARCHON GLACIEX-09 DEPLOYED.',
+      color: '#ffffff',
+      duration: 5.0
+    },
+    {
+      id: 'cryo_alert_2',
+      sender: 'ECHO',
+      tag: 'ECHO // PRIORITY',
+      text: 'Kira! Glaciex is spinning refraction spires! Freeze its frost crystals and shatter them back into its armor!',
+      color: '#4deeea',
+      duration: 5.0
+    }
+  ],
+  CRYO_BOSS_DEFEATED: [
+    {
+      id: 'cryo_win_1',
+      sender: 'KIRA',
+      tag: 'VESPER-01 // KIRA',
+      text: 'Cryo-Archon shattered into dust! The Null Zone thermal locks are blowing wide open!',
+      color: '#00ff88',
+      duration: 4.5
+    },
+    {
+      id: 'cryo_win_2',
+      sender: 'ECHO',
+      tag: 'ECHO // VICTORY',
+      text: 'Sector 3 conquered! Sub-Zero stasis broken. The timeline pathway to Sector 4 is clear!',
+      color: '#74ebd5',
+      duration: 5.0
+    }
   ]
 };
 

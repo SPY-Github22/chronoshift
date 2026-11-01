@@ -11,6 +11,12 @@ An adrenaline-pumping, retro-cyberpunk arcade evasion game where time bends to y
 
 ---
 
+## 🌌 The Campaign Sectors
+
+- **Sector 1: The Firewall Perimeter**: Fast evasion against automated purge sentinels, laser telegraph sweeps, and tachyon grazing fundamentals.
+- **Sector 2: The Quantum Foundry [LEVEL 2]**: Industrial cyber-forge featuring gravitational singularity vortexes, Newtonian inverse-square curving, and the **A.P.E.X. Forge Sentinel MK-II** boss.
+- **Sector 3: The Sub-Zero Null Zone [LEVEL 3]**: Absolute-zero temporal cryogenic stasis where Chronoshift flash-freezes hazards into brittle ice shards, allowing players to shatter them with EMP cascades against **Cryo-Archon Glaciex-09**!
+
 ## 🕹️ Core Game Mechanics
 
 - **⚡ Chrono Dilation (Bullet Time)**: Hold `Space` or `Right-Click` to dilate time to 22% speed. Time slows down around you while maintaining snappy ship control.
