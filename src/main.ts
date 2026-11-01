@@ -25,6 +25,7 @@ class ChronoshiftGame {
   };
 
   private lastTime = 0;
+  private currentTrackedWave = 1;
 
   // DOM Elements
   private hudScore: HTMLElement;
@@ -85,7 +86,15 @@ class ChronoshiftGame {
         e.preventDefault();
       }
       if (code === 'KeyE') this.input.triggerEmp = true;
-      if (code === 'KeyM') sound.toggleMute();
+      if (code === 'KeyM') {
+        const isMuted = sound.toggleMute();
+        this.vfx.spawnFloatingText(
+          isMuted ? 'AUDIO: MUTED' : 'AUDIO: ON',
+          this.playerCtrl.player.pos,
+          '#ffaa00',
+          1.1
+        );
+      }
     });
 
     window.addEventListener('keyup', (e) => {
@@ -98,6 +107,7 @@ class ChronoshiftGame {
       if (code === 'KeyE') this.input.triggerEmp = false;
     });
 
+    // Pointer controls
     this.canvas.addEventListener('mousemove', (e) => {
       const rect = this.canvas.getBoundingClientRect();
       const scaleX = this.canvas.width / rect.width;
@@ -124,6 +134,43 @@ class ChronoshiftGame {
 
     this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
+    // Touch controls for mobile / tablet
+    const handleTouch = (e: TouchEvent) => {
+      if (e.touches.length > 0) {
+        const touch = e.touches[0];
+        const rect = this.canvas.getBoundingClientRect();
+        const scaleX = this.canvas.width / rect.width;
+        const scaleY = this.canvas.height / rect.height;
+        this.input.pointerPos.x = (touch.clientX - rect.left) * scaleX;
+        this.input.pointerPos.y = (touch.clientY - rect.top) * scaleY;
+        this.input.isPointerActive = true;
+
+        // Two fingers activate Chronoshift
+        if (e.touches.length >= 2) {
+          this.input.chrono = true;
+        } else {
+          this.input.chrono = false;
+        }
+      }
+    };
+
+    this.canvas.addEventListener('touchstart', (e) => {
+      handleTouch(e);
+      e.preventDefault();
+    }, { passive: false });
+
+    this.canvas.addEventListener('touchmove', (e) => {
+      handleTouch(e);
+      e.preventDefault();
+    }, { passive: false });
+
+    this.canvas.addEventListener('touchend', (e) => {
+      if (e.touches.length === 0) {
+        this.input.isPointerActive = false;
+        this.input.chrono = false;
+      }
+    });
+
     this.startBtn.addEventListener('click', () => {
       this.startGame();
     });
@@ -131,15 +178,33 @@ class ChronoshiftGame {
 
   private startGame(): void {
     this.state.resetGame();
+    this.currentTrackedWave = 1;
     this.playerCtrl.reset(this.canvas.width * 0.5, this.canvas.height * 0.5);
     this.hazardDirector.reset();
     this.overlay.style.display = 'none';
+
+    // Start Dynamic Synthwave BGM
+    sound.startBGM();
+    sound.setWaveTempo(1);
   }
 
   private gameOver(): void {
     this.state.setMode('GAMEOVER');
+    sound.stopBGM();
+
+    const { score, wave, grazeCount, empUsedCount } = this.state.stats;
+    let rank = 'C';
+    if (score > 60000) rank = 'SSS';
+    else if (score > 35000) rank = 'S';
+    else if (score > 18000) rank = 'A';
+    else if (score > 8000) rank = 'B';
+
     this.overlayTitle.innerText = 'MISSION FAILED';
-    this.overlaySubtitle.innerText = `FINAL SCORE: ${this.state.stats.score.toLocaleString()} | WAVE: ${this.state.stats.wave}`;
+    this.overlaySubtitle.innerHTML = `
+      <div style="font-size: 26px; color: #00f3ff; margin-bottom: 8px;">RANK: ${rank}</div>
+      SCORE: ${score.toLocaleString()} | WAVE: ${wave}<br/>
+      GRAZES: ${grazeCount} | EMPS RELEASED: ${empUsedCount}
+    `;
     this.startBtn.innerText = 'RESTART SYSTEM';
     this.overlay.style.display = 'flex';
   }
@@ -206,6 +271,20 @@ class ChronoshiftGame {
       // Scaled dt for world hazards
       const scaledDt = rawDt * timeScale;
       this.state.update(scaledDt);
+
+      // Check Wave advancement
+      if (this.state.stats.wave > this.currentTrackedWave) {
+        this.currentTrackedWave = this.state.stats.wave;
+        sound.playWaveAdvance();
+        sound.setWaveTempo(this.currentTrackedWave);
+        this.vfx.spawnFloatingText(
+          `WAVE ${this.currentTrackedWave} - HAZARD LEVEL UP`,
+          { x: this.canvas.width * 0.5, y: this.canvas.height * 0.3 },
+          '#00f3ff',
+          1.6
+        );
+        this.vfx.triggerScreenShake(9, 0.4);
+      }
 
       // Update hazards & collisions
       const { hits, grazes, coresCollected } = this.hazardDirector.update(
