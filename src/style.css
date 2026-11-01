@@ -217,3 +217,30 @@ p.subtitle {
     display: none;
   }
 }
+
+.sector-btn {
+  background: rgba(4, 18, 30, 0.7);
+  border: 1px solid rgba(0, 243, 255, 0.4);
+  color: #88aabb;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.2s ease;
+}
+
+.sector-btn:hover {
+  border-color: #00f3ff;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+}
+
+.sector-btn-active {
+  background: rgba(0, 243, 255, 0.2);
+  border-color: #00f3ff;
+  color: #00f3ff;
+  box-shadow: 0 0 14px rgba(0, 243, 255, 0.5);
+}

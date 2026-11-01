@@ -15,6 +15,7 @@
       <div class="hud-panel">
         <div>SCORE: <span id="hud-score">0</span></div>
         <div>HIGH: <span id="hud-high">0</span></div>
+        <div>SECTOR: <span id="hud-sector" style="color: #00f3ff;">01 // PERIMETER</span></div>
         <div>WAVE: <span id="hud-wave">1</span></div>
       </div>
       <div class="hud-panel" style="align-items: center;">
@@ -46,7 +47,13 @@
     <div id="overlay">
       <h1 id="overlay-title">CHRONOSHIFT</h1>
       <p class="subtitle" id="overlay-subtitle">NEON OVERDRIVE</p>
-      <button id="start-btn" class="btn-primary">START OVERDRIVE</button>
+
+      <div id="sector-select-group" style="display: flex; gap: 12px; margin-bottom: 20px;">
+        <button id="sector-1-btn" class="sector-btn sector-btn-active">SECTOR 1: FIREWALL PERIMETER</button>
+        <button id="sector-2-btn" class="sector-btn">SECTOR 2: THE QUANTUM FOUNDRY [LEVEL 2]</button>
+      </div>
+
+      <button id="start-btn" class="btn-primary">LAUNCH MISSION</button>
       <div class="controls-hint">
         [WASD / ARROWS] Move Ship &nbsp;|&nbsp; [SPACE / RIGHT CLICK] Chronoshift (Slow-Mo)<br />
         [E / LEFT CLICK] EMP Blast (When Charged) &nbsp;|&nbsp; [M] Toggle Audio

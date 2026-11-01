@@ -18,6 +18,7 @@ export class GameStateManager {
   public mode: GameMode = 'MENU';
   public stats: GameStats;
   public config: GameConfig;
+  public currentSector: 1 | 2 = 1;
 
   constructor(customConfig?: Partial<GameConfig>) {
     this.config = { ...DEFAULT_CONFIG, ...customConfig };
@@ -59,7 +60,14 @@ export class GameStateManager {
     }
   }
 
-  public resetGame(): void {
+  public setSector(sector: 1 | 2): void {
+    this.currentSector = sector;
+  }
+
+  public resetGame(sector?: 1 | 2): void {
+    if (sector !== undefined) {
+      this.currentSector = sector;
+    }
     this.stats.score = 0;
     this.stats.multiplier = 1;
     this.stats.comboCount = 0;
