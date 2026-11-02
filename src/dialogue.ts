@@ -214,6 +214,76 @@ export const STORY_SCRIPTS: Record<string, DialogueMessage[]> = {
       color: '#facc15',
       duration: 5.0
     }
+  ],
+  SECTOR5_CORE_START: [
+    {
+      id: 's5_intro_1',
+      sender: 'ECHO',
+      tag: 'ECHO // SECTOR 05 CORE',
+      text: 'Kira, this is it... Sector 05: The Singularity Core! Spacetime has collapsed into an event horizon void.',
+      color: '#ff00aa',
+      duration: 4.5
+    },
+    {
+      id: 's5_intro_2',
+      sender: 'ECHO',
+      tag: 'ECHO // TACTICAL ARCHIVE',
+      text: 'A.P.E.X. Prime will shift reality across all 4 sectors! Gravity, cryo-shatter, wormholes, and superluminal warp—unify them all!',
+      color: '#facc15',
+      duration: 5.0
+    },
+    {
+      id: 's5_intro_3',
+      sender: 'KIRA',
+      tag: 'VESPER-01 // KIRA',
+      text: 'Tachyon core at 200%. No more running. For the timeline... we shatter the mainframe.',
+      color: '#00ff88',
+      duration: 4.0
+    }
+  ],
+  APEX_PRIME_SPAWN: [
+    {
+      id: 'apex_spawn_1',
+      sender: 'APEX',
+      tag: 'A.P.E.X. PRIME // TOTAL COLLAPSE',
+      text: 'THE WEFT SHATTERS. TEMPORAL CHAOS CEASES. BEHOLD THE ENTROPIC ARCHITECT.',
+      color: '#ffffff',
+      duration: 5.0
+    },
+    {
+      id: 'apex_spawn_2',
+      sender: 'ECHO',
+      tag: 'ECHO // DANGER CRITICAL',
+      text: 'A.P.E.X. Prime has manifested! Teleport behind its dimensional barrier in Phase 3, and ram it in Superluminal Warp!',
+      color: '#ff0055',
+      duration: 5.0
+    }
+  ],
+  APEX_PRIME_DEFEATED: [
+    {
+      id: 'apex_win_1',
+      sender: 'KIRA',
+      tag: 'VESPER-01 // KIRA',
+      text: 'Direct hit on the Prime Singularity! The entropic collapse is reversing!',
+      color: '#00ff88',
+      duration: 4.5
+    },
+    {
+      id: 'apex_win_2',
+      sender: 'ECHO',
+      tag: 'ECHO // VICTORY TRANSMISSION',
+      text: 'The Weft has stabilized! Quarantine sectors dissolving... Pilot Kira Voss, you did it. Timeline restored!',
+      color: '#00f3ff',
+      duration: 5.5
+    },
+    {
+      id: 'apex_win_3',
+      sender: 'KIRA',
+      tag: 'VESPER-01 // KIRA',
+      text: 'Mission accomplished, Echo. We are going home. Vesper-01, signing off.',
+      color: '#00ff88',
+      duration: 4.5
+    }
   ]
 };
 

@@ -17,6 +17,11 @@ An adrenaline-pumping, retro-cyberpunk arcade evasion game where time bends to y
 - **Sector 2: The Quantum Foundry [LEVEL 2]**: Industrial cyber-forge featuring gravitational singularity vortexes, Newtonian inverse-square curving, and the **A.P.E.X. Forge Sentinel MK-II** boss.
 - **Sector 3: The Sub-Zero Null Zone [LEVEL 3]**: Absolute-zero temporal cryogenic stasis where Chronoshift flash-freezes hazards into brittle ice shards, allowing players to shatter them with EMP cascades against **Cryo-Archon Glaciex-09**!
 - **Sector 4: The Hyper-Tachyon Slipstream [LEVEL 4]**: Relativistic warp tunnel with speed gates, paired Black Hole / White Hole teleportation portals, and an Ace Combat dogfight duel against rival **Nemesis-00 'Chronos-Omega'**!
+- **Sector 5: The Singularity Core [FINALE - LEVEL 5]**: The epicenter of the temporal collapse! Face the ultimate progenitor rogue intelligence **A.P.E.X. Prime** in a climactic 4-phase reality war:
+  - *Phase 1 (Quantum Mirror)*: Dimensional shield rotation and chronal orb sweeps.
+  - *Phase 2 (Graviton Overcharge)*: Twin gravity wells warping projectiles and player vectors.
+  - *Phase 3 (Absolute Zero Cascade)*: Cryogenic blizzard frost accumulation and ice projectile barrages.
+  - *Phase 4 (Cosmic Collapse)*: Warp portals, tachyonic speed gates, and 12-way Supernova bullet-hell barrages! Defeat A.P.E.X. Prime to restore the spacetime continuum and unlock the Grand Campaign Victory epilogue.
 
 ## 🕹️ Core Game Mechanics
 
@@ -47,7 +52,7 @@ An adrenaline-pumping, retro-cyberpunk arcade evasion game where time bends to y
 
 - **Language & Runtime**: TypeScript 5 with strict compilation (`noEmit`, strict nulls, unused locals checking)
 - **Bundler & Dev Server**: Vite 5
-- **Unit Testing**: Vitest test runner (covering vector algebra, collision geometry, and grazing logic)
+- **Unit Testing**: Vitest test runner (27 unit tests across 6 suites covering vector algebra, state management, gravity wells, cryo mechanics, wormhole slipstreams, and A.P.E.X. Prime multi-phase boss mechanics)
 - **Graphics**: Hardware-accelerated HTML5 Canvas 2D with particle pooling, screen-shake impulse physics, and retro CRT scanline styling
 - **Audio Engine**: Embedded Web Audio API procedural synthesizer (oscillators, biquad filter sweeps, and noise buffers)
 - **CI/CD**: GitHub Actions workflow automatically testing, building, and deploying directly to GitHub Pages on every push to `main`

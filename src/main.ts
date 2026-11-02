@@ -11,6 +11,7 @@ import { CryoManager } from './freeze';
 import { CryoArchonBoss } from './cryoBoss';
 import { SlipstreamManager } from './slipstream';
 import { NemesisRivalBoss } from './nemesisBoss';
+import { ApexPrimeBoss } from './apexPrimeBoss';
 
 class ChronoshiftGame {
   private canvas: HTMLCanvasElement;
@@ -26,6 +27,7 @@ class ChronoshiftGame {
   private cryoBoss: CryoArchonBoss;
   private slipstream: SlipstreamManager;
   private nemesisBoss: NemesisRivalBoss;
+  private apexPrime: ApexPrimeBoss;
 
   private input: InputState = {
     up: false,
@@ -40,7 +42,7 @@ class ChronoshiftGame {
 
   private lastTime = 0;
   private currentTrackedWave = 1;
-  private selectedSector: 1 | 2 | 3 | 4 = 1;
+  private selectedSector: 1 | 2 | 3 | 4 | 5 = 1;
   private hasBossSpawnedThisRun = false;
 
   // DOM Elements
@@ -65,6 +67,7 @@ class ChronoshiftGame {
   private sector2Btn: HTMLButtonElement;
   private sector3Btn: HTMLButtonElement;
   private sector4Btn: HTMLButtonElement;
+  private sector5Btn: HTMLButtonElement;
 
   constructor() {
     this.canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
@@ -85,6 +88,7 @@ class ChronoshiftGame {
     this.cryoBoss = new CryoArchonBoss();
     this.slipstream = new SlipstreamManager();
     this.nemesisBoss = new NemesisRivalBoss();
+    this.apexPrime = new ApexPrimeBoss();
 
     // Bind DOM
     this.hudScore = document.getElementById('hud-score')!;
@@ -108,6 +112,7 @@ class ChronoshiftGame {
     this.sector2Btn = document.getElementById('sector-2-btn') as HTMLButtonElement;
     this.sector3Btn = document.getElementById('sector-3-btn') as HTMLButtonElement;
     this.sector4Btn = document.getElementById('sector-4-btn') as HTMLButtonElement;
+    this.sector5Btn = document.getElementById('sector-5-btn') as HTMLButtonElement;
 
     this.setupListeners();
     this.updateHUD();
@@ -250,9 +255,10 @@ class ChronoshiftGame {
       this.sector2Btn.classList.toggle('sector-btn-active', this.selectedSector === 2);
       this.sector3Btn.classList.toggle('sector-btn-active', this.selectedSector === 3);
       this.sector4Btn.classList.toggle('sector-btn-active', this.selectedSector === 4);
+      this.sector5Btn.classList.toggle('sector-btn-active', this.selectedSector === 5);
     };
 
-    if (this.sector1Btn && this.sector2Btn && this.sector3Btn && this.sector4Btn) {
+    if (this.sector1Btn && this.sector2Btn && this.sector3Btn && this.sector4Btn && this.sector5Btn) {
       this.sector1Btn.addEventListener('click', () => {
         this.selectedSector = 1;
         updateSectorButtons();
@@ -270,6 +276,11 @@ class ChronoshiftGame {
 
       this.sector4Btn.addEventListener('click', () => {
         this.selectedSector = 4;
+        updateSectorButtons();
+      });
+
+      this.sector5Btn.addEventListener('click', () => {
+        this.selectedSector = 5;
         updateSectorButtons();
       });
     }
@@ -292,16 +303,26 @@ class ChronoshiftGame {
     this.boss.active = false;
     this.cryoBoss.active = false;
     this.nemesisBoss.active = false;
+    this.apexPrime.active = false;
     this.overlay.style.display = 'none';
 
     // Sector specifics
-    if (this.selectedSector === 4) {
+    if (this.selectedSector === 5) {
+      this.containerFrost.style.display = 'flex';
+      this.containerHyper.style.display = 'flex';
+      this.dialogue.queueScript('SECTOR5_CORE_START');
+      this.gravityField.spawnWell(480, 260, 200, 22, 240, 1.3);
+      this.slipstream.spawnWormholePair(180, 240, 780, 360);
+      this.apexPrime.spawn(480, 170);
+      this.dialogue.queueScript('APEX_PRIME_SPAWN');
+      this.hasBossSpawnedThisRun = true;
+      sound.setWaveTempo(1, true);
+    } else if (this.selectedSector === 4) {
       this.containerFrost.style.display = 'none';
       this.containerHyper.style.display = 'flex';
       this.dialogue.queueScript('SECTOR4_STREAM_START');
-      // Spawn initial paired wormholes
       this.slipstream.spawnWormholePair(220, 240, 740, 360);
-      sound.setWaveTempo(1, true); // 155 BPM Darksynth mode!
+      sound.setWaveTempo(1, true);
     } else if (this.selectedSector === 3) {
       this.containerFrost.style.display = 'flex';
       this.containerHyper.style.display = 'none';
@@ -329,7 +350,8 @@ class ChronoshiftGame {
 
     const { score, wave, grazeCount, empUsedCount } = this.state.stats;
     let rank = 'C';
-    if (score > 60000) rank = 'SSS';
+    if (score > 100000 || this.state.campaignCompleted) rank = 'CHRONO MASTER (SSS)';
+    else if (score > 60000) rank = 'SSS';
     else if (score > 35000) rank = 'S';
     else if (score > 18000) rank = 'A';
     else if (score > 8000) rank = 'B';
@@ -338,23 +360,38 @@ class ChronoshiftGame {
       1: '01 // PERIMETER',
       2: '02 // FOUNDRY',
       3: '03 // NULL ZONE',
-      4: '04 // SLIPSTREAM'
+      4: '04 // SLIPSTREAM',
+      5: '05 // SINGULARITY CORE'
     };
 
     const sectorColors = {
       1: '#00f3ff',
       2: '#ff6600',
       3: '#74ebd5',
-      4: '#facc15'
+      4: '#facc15',
+      5: '#ff00aa'
     };
 
-    this.overlayTitle.innerText = 'MISSION FAILED';
-    this.overlaySubtitle.innerHTML = `
-      <div style="font-size: 26px; color: ${sectorColors[this.selectedSector]}; margin-bottom: 8px;">RANK: ${rank}</div>
-      SECTOR ${sectorNames[this.selectedSector]} | SCORE: ${score.toLocaleString()}<br/>
-      WAVE: ${wave} | GRAZES: ${grazeCount} | EMPS: ${empUsedCount}
-    `;
-    this.startBtn.innerText = 'RESTART OPERATION';
+    if (this.state.campaignCompleted) {
+      this.overlayTitle.innerText = 'CAMPAIGN CONQUERED';
+      this.overlayTitle.style.color = '#00ff88';
+      this.overlaySubtitle.innerHTML = `
+        <div style="font-size: 28px; color: #facc15; margin-bottom: 8px;">RANK: ${rank}</div>
+        THE WEFT STABILIZED | TIMELINE RESTORED<br/>
+        FINAL SCORE: ${score.toLocaleString()} | GRAZES: ${grazeCount} | EMPS: ${empUsedCount}
+      `;
+      this.startBtn.innerText = 'PLAY AGAIN';
+    } else {
+      this.overlayTitle.innerText = 'MISSION FAILED';
+      this.overlayTitle.style.color = '#00f3ff';
+      this.overlaySubtitle.innerHTML = `
+        <div style="font-size: 26px; color: ${sectorColors[this.selectedSector]}; margin-bottom: 8px;">RANK: ${rank}</div>
+        SECTOR ${sectorNames[this.selectedSector]} | SCORE: ${score.toLocaleString()}<br/>
+        WAVE: ${wave} | GRAZES: ${grazeCount} | EMPS: ${empUsedCount}
+      `;
+      this.startBtn.innerText = 'RESTART OPERATION';
+    }
+
     this.overlay.style.display = 'flex';
   }
 
@@ -366,7 +403,10 @@ class ChronoshiftGame {
     this.hudHigh.innerText = stats.highScore.toLocaleString();
     this.hudWave.innerText = stats.wave.toString();
 
-    if (currentSector === 4) {
+    if (currentSector === 5) {
+      this.hudSector.innerText = '05 // CORE';
+      this.hudSector.style.color = '#ff00aa';
+    } else if (currentSector === 4) {
       this.hudSector.innerText = '04 // SLIPSTREAM';
       this.hudSector.style.color = '#facc15';
     } else if (currentSector === 3) {
@@ -402,14 +442,16 @@ class ChronoshiftGame {
       this.meterEmp.style.boxShadow = 'none';
     }
 
-    if (currentSector === 3) {
+    if (currentSector === 3 || currentSector === 5) {
       this.meterFrost.style.width = `${Math.round(player.frostLevel)}%`;
       if (player.isFrozenStiff) {
         this.meterFrost.style.boxShadow = '0 0 12px #ffffff';
       } else {
         this.meterFrost.style.boxShadow = '0 0 8px #74ebd5';
       }
-    } else if (currentSector === 4) {
+    }
+
+    if (currentSector === 4 || currentSector === 5) {
       this.meterHyper.style.width = `${Math.round(this.slipstream.hyperDriveCharge)}%`;
       if (this.slipstream.isSuperluminal) {
         this.meterHyper.style.boxShadow = '0 0 16px #facc15';
@@ -427,8 +469,8 @@ class ChronoshiftGame {
     if (this.state.mode === 'PLAYING') {
       const bounds = { width: this.canvas.width, height: this.canvas.height };
 
-      // Apply Gravity pull in Sector 2
-      if (this.state.currentSector === 2) {
+      // Apply Gravity pull in Sector 2 and Sector 5
+      if (this.state.currentSector === 2 || this.state.currentSector === 5) {
         const { newVel, insideEventHorizon } = this.gravityField.applyToBody(
           this.playerCtrl.player.pos,
           this.playerCtrl.player.vel,
@@ -448,8 +490,8 @@ class ChronoshiftGame {
       }
 
       // Update Player & get Time Scale
-      const isSubZero = this.state.currentSector === 3;
-      const isSector4 = this.state.currentSector === 4;
+      const isSubZero = this.state.currentSector === 3 || (this.state.currentSector === 5 && this.apexPrime.phase === 2);
+      const isSector4Or5 = this.state.currentSector === 4 || this.state.currentSector === 5;
       const { timeScale, empTriggered } = this.playerCtrl.update(
         rawDt,
         this.input,
@@ -459,7 +501,7 @@ class ChronoshiftGame {
         isSubZero
       );
 
-      // Freeze Pulse Trigger in Sector 3 when Chronoshift active
+      // Freeze Pulse Trigger when Chronoshift active
       if (isSubZero && this.playerCtrl.player.isChronoActive) {
         const targets = this.hazardDirector.hazards.map((h) => ({ pos: h.pos, radius: h.radius, id: h.id }));
         const frozenIds = this.cryo.triggerFreezePulse(this.playerCtrl.player.pos, 150, targets, this.vfx);
@@ -469,8 +511,8 @@ class ChronoshiftGame {
         }
       }
 
-      // Slipstream & Wormhole Teleport in Sector 4
-      if (isSector4) {
+      // Slipstream & Wormhole Teleport in Sector 4 and Sector 5
+      if (isSector4Or5) {
         const slipResult = this.slipstream.update(
           rawDt * timeScale,
           rawDt,
@@ -515,8 +557,8 @@ class ChronoshiftGame {
           this.vfx.spawnFloatingText(`EMP PURGE +${bonus}!`, this.playerCtrl.player.pos, '#ff00aa', 1.4);
         }
 
-        // Shatter frozen crystal shards in Sector 3
-        if (isSubZero) {
+        // Shatter frozen crystal shards
+        if (isSubZero || this.state.currentSector === 5) {
           const { count, totalScore } = this.cryo.shatterAt(
             this.playerCtrl.player.pos,
             Math.max(bounds.width, bounds.height),
@@ -526,6 +568,9 @@ class ChronoshiftGame {
           if (count > 0) {
             this.state.addScore(totalScore);
             this.vfx.spawnFloatingText(`SHATTER CASCADE x${count}! +${totalScore}`, this.playerCtrl.player.pos, '#74ebd5', 1.8);
+            if (this.apexPrime.active) {
+              this.apexPrime.damage(count * 80, this.playerCtrl.player.pos, this.vfx, sound, true);
+            }
           }
         }
 
@@ -554,6 +599,17 @@ class ChronoshiftGame {
             this.state.addScore(50000);
             this.dialogue.queueScript('NEMESIS_DEFEATED');
             this.vfx.spawnFloatingText('NEMESIS-00 OBLITERATED! +50,000', this.nemesisBoss.pos, '#facc15', 2.4);
+          }
+        }
+
+        if (this.apexPrime.active) {
+          const apexKilled = this.apexPrime.damage(420, this.playerCtrl.player.pos, this.vfx, sound);
+          if (apexKilled) {
+            this.state.addScore(100000);
+            this.state.campaignCompleted = true;
+            this.dialogue.queueScript('APEX_PRIME_DEFEATED');
+            this.vfx.spawnFloatingText('A.P.E.X. PRIME DESTROYED! +100,000', this.apexPrime.pos, '#ffffff', 2.5);
+            setTimeout(() => this.gameOver(), 5000);
           }
         }
       }
@@ -588,11 +644,11 @@ class ChronoshiftGame {
       }
 
       // Environmental physics updates
-      if (this.state.currentSector === 2) {
+      if (this.state.currentSector === 2 || this.state.currentSector === 5) {
         this.gravityField.update(scaledDt);
       }
 
-      if (this.state.currentSector === 3) {
+      if (this.state.currentSector === 3 || this.state.currentSector === 5) {
         this.cryo.update(scaledDt, this.vfx);
       }
 
@@ -600,10 +656,10 @@ class ChronoshiftGame {
       if (this.state.stats.wave > this.currentTrackedWave) {
         this.currentTrackedWave = this.state.stats.wave;
         sound.playWaveAdvance();
-        sound.setWaveTempo(this.currentTrackedWave, isSector4);
-        const waveColor = isSector4 ? '#facc15' : this.state.currentSector === 3 ? '#74ebd5' : this.state.currentSector === 2 ? '#ff6600' : '#00f3ff';
+        sound.setWaveTempo(this.currentTrackedWave, isSector4Or5);
+        const waveColor = this.state.currentSector === 5 ? '#ff00aa' : isSector4Or5 ? '#facc15' : this.state.currentSector === 3 ? '#74ebd5' : this.state.currentSector === 2 ? '#ff6600' : '#00f3ff';
         this.vfx.spawnFloatingText(
-          `WAVE ${this.currentTrackedWave} - SPEED ELEVATED`,
+          `WAVE ${this.currentTrackedWave} - ENERGY CRITICAL`,
           { x: this.canvas.width * 0.5, y: this.canvas.height * 0.3 },
           waveColor,
           1.6
@@ -689,6 +745,46 @@ class ChronoshiftGame {
         }
       }
 
+      if (this.apexPrime.active) {
+        const apexResult = this.apexPrime.update(
+          scaledDt,
+          rawDt,
+          this.playerCtrl.player,
+          this.slipstream.isSuperluminal,
+          this.vfx,
+          sound,
+          this.hazardDirector,
+          this.cryo
+        );
+
+        for (let i = 0; i < apexResult.grazes; i++) {
+          const { pointsEarned, newMultiplier } = this.state.registerGraze();
+          this.playerCtrl.onGraze(
+            this.state.config.grazeChronoBonus * 2.0,
+            this.state.config.grazeEmpBonus * 2.0,
+            this.vfx,
+            sound
+          );
+          this.vfx.spawnFloatingText(`CORE GRAZE +${pointsEarned}! (${newMultiplier}x)`, this.playerCtrl.player.pos, '#ff00aa', 1.2);
+        }
+
+        for (let i = 0; i < apexResult.hits; i++) {
+          const isDead = this.playerCtrl.takeHit(this.vfx, sound);
+          if (isDead) {
+            this.gameOver();
+            break;
+          }
+        }
+
+        if (apexResult.bossKilled) {
+          this.state.addScore(100000);
+          this.state.campaignCompleted = true;
+          this.dialogue.queueScript('APEX_PRIME_DEFEATED');
+          this.vfx.spawnFloatingText('A.P.E.X. PRIME DESTROYED! +100,000', this.apexPrime.pos, '#ffffff', 2.5);
+          setTimeout(() => this.gameOver(), 5000);
+        }
+      }
+
       // Update hazards & collisions
       const { hits, grazes, coresCollected, collectedPowerUps } = this.hazardDirector.update(
         scaledDt,
@@ -717,6 +813,7 @@ class ChronoshiftGame {
           if (this.boss.active) this.boss.damage(300, this.vfx, sound);
           if (this.cryoBoss.active) this.cryoBoss.damage(350, this.vfx, sound);
           if (this.nemesisBoss.active) this.nemesisBoss.damage(400, this.vfx, sound);
+          if (this.apexPrime.active) this.apexPrime.damage(450, this.playerCtrl.player.pos, this.vfx, sound);
           this.vfx.spawnFloatingText(`TACTICAL NUKE PURGE!`, this.playerCtrl.player.pos, '#ffaa00', 1.6);
         }
       }
@@ -778,7 +875,9 @@ class ChronoshiftGame {
     this.ctx.translate(shake.x, shake.y);
 
     // Clear background per Sector
-    if (this.state.currentSector === 4) {
+    if (this.state.currentSector === 5) {
+      this.ctx.fillStyle = '#08010c'; // Event Horizon Singularity Void
+    } else if (this.state.currentSector === 4) {
       this.ctx.fillStyle = '#0a0214'; // Relativistic warp purple
     } else if (this.state.currentSector === 3) {
       this.ctx.fillStyle = '#020814'; // Glacial midnight
@@ -793,11 +892,13 @@ class ChronoshiftGame {
     this.renderGrid(width, height);
 
     // Render Sector Environmental Mechanics
-    if (this.state.currentSector === 2) {
+    if (this.state.currentSector === 2 || this.state.currentSector === 5) {
       this.gravityField.render(this.ctx);
-    } else if (this.state.currentSector === 3) {
+    }
+    if (this.state.currentSector === 3 || this.state.currentSector === 5) {
       this.cryo.render(this.ctx);
-    } else if (this.state.currentSector === 4) {
+    }
+    if (this.state.currentSector === 4 || this.state.currentSector === 5) {
       this.slipstream.render(this.ctx);
     }
 
@@ -817,6 +918,10 @@ class ChronoshiftGame {
       this.nemesisBoss.render(this.ctx);
     }
 
+    if (this.apexPrime.active) {
+      this.apexPrime.render(this.ctx);
+    }
+
     if (this.state.mode === 'PLAYING') {
       this.playerCtrl.render(this.ctx);
     }
@@ -830,7 +935,9 @@ class ChronoshiftGame {
   private renderGrid(width: number, height: number): void {
     this.ctx.save();
     const sector = this.state.currentSector;
-    if (sector === 4) {
+    if (sector === 5) {
+      this.ctx.strokeStyle = 'rgba(255, 0, 170, 0.09)';
+    } else if (sector === 4) {
       this.ctx.strokeStyle = 'rgba(168, 85, 247, 0.08)';
     } else if (sector === 3) {
       this.ctx.strokeStyle = 'rgba(77, 238, 234, 0.08)';
