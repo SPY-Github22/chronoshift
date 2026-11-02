@@ -16,6 +16,7 @@ An adrenaline-pumping, retro-cyberpunk arcade evasion game where time bends to y
 - **Sector 1: The Firewall Perimeter**: Fast evasion against automated purge sentinels, laser telegraph sweeps, and tachyon grazing fundamentals.
 - **Sector 2: The Quantum Foundry [LEVEL 2]**: Industrial cyber-forge featuring gravitational singularity vortexes, Newtonian inverse-square curving, and the **A.P.E.X. Forge Sentinel MK-II** boss.
 - **Sector 3: The Sub-Zero Null Zone [LEVEL 3]**: Absolute-zero temporal cryogenic stasis where Chronoshift flash-freezes hazards into brittle ice shards, allowing players to shatter them with EMP cascades against **Cryo-Archon Glaciex-09**!
+- **Sector 4: The Hyper-Tachyon Slipstream [LEVEL 4]**: Relativistic warp tunnel with speed gates, paired Black Hole / White Hole teleportation portals, and an Ace Combat dogfight duel against rival **Nemesis-00 'Chronos-Omega'**!
 
 ## 🕹️ Core Game Mechanics
 

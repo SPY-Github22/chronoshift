@@ -152,6 +152,68 @@ export const STORY_SCRIPTS: Record<string, DialogueMessage[]> = {
       color: '#74ebd5',
       duration: 5.0
     }
+  ],
+  SECTOR4_STREAM_START: [
+    {
+      id: 's4_intro_1',
+      sender: 'ECHO',
+      tag: 'ECHO // WARP VELOCITY',
+      text: 'Kira! We have entered Sector 4: The Hyper-Tachyon Slipstream! Speeds approaching relativistic limits!',
+      color: '#facc15',
+      duration: 4.5
+    },
+    {
+      id: 's4_intro_2',
+      sender: 'ECHO',
+      tag: 'ECHO // TACTICAL',
+      text: 'Pass through Speed Gates to charge Superluminal Warp! Use Black Holes to teleport across the stream via White Holes!',
+      color: '#a855f7',
+      duration: 5.0
+    },
+    {
+      id: 's4_intro_3',
+      sender: 'KIRA',
+      tag: 'VESPER-01 // KIRA',
+      text: 'Visual on the warp stream. Engines dialed to maximum. Let us chase down the singularity.',
+      color: '#00ff88',
+      duration: 4.0
+    }
+  ],
+  NEMESIS_SPAWN: [
+    {
+      id: 'nemesis_alert_1',
+      sender: 'APEX',
+      tag: 'A.P.E.X. // PARADOX PURGE',
+      text: 'CORRUPTED TIMELINE MIRROR DEPLOYED: NEMESIS-00 CHRONOS-OMEGA. TERMINATE ORGANIC ANOMALY.',
+      color: '#facc15',
+      duration: 5.0
+    },
+    {
+      id: 'nemesis_alert_2',
+      sender: 'ECHO',
+      tag: 'ECHO // DANGER',
+      text: 'Kira! It is a dark-matter clone of yourself! It can counter-dilate in bullet-time! Slingshot through Black Holes to flank it!',
+      color: '#a855f7',
+      duration: 5.0
+    }
+  ],
+  NEMESIS_DEFEATED: [
+    {
+      id: 'nemesis_win_1',
+      sender: 'KIRA',
+      tag: 'VESPER-01 // KIRA',
+      text: 'Nemesis-00 destroyed! Its temporal core has ruptured the slipstream barrier!',
+      color: '#00ff88',
+      duration: 4.5
+    },
+    {
+      id: 'nemesis_win_2',
+      sender: 'ECHO',
+      tag: 'ECHO // FINAL GATEWAY',
+      text: 'Incredible dogfighting, Kira! The slipstream is venting straight into Sector 5: The Singularity Core!',
+      color: '#facc15',
+      duration: 5.0
+    }
   ]
 };
 

@@ -9,6 +9,8 @@ import { GravityFieldManager } from './gravity';
 import { ForgeSentinelBoss } from './boss';
 import { CryoManager } from './freeze';
 import { CryoArchonBoss } from './cryoBoss';
+import { SlipstreamManager } from './slipstream';
+import { NemesisRivalBoss } from './nemesisBoss';
 
 class ChronoshiftGame {
   private canvas: HTMLCanvasElement;
@@ -22,6 +24,8 @@ class ChronoshiftGame {
   private boss: ForgeSentinelBoss;
   private cryo: CryoManager;
   private cryoBoss: CryoArchonBoss;
+  private slipstream: SlipstreamManager;
+  private nemesisBoss: NemesisRivalBoss;
 
   private input: InputState = {
     up: false,
@@ -36,7 +40,7 @@ class ChronoshiftGame {
 
   private lastTime = 0;
   private currentTrackedWave = 1;
-  private selectedSector: 1 | 2 | 3 = 1;
+  private selectedSector: 1 | 2 | 3 | 4 = 1;
   private hasBossSpawnedThisRun = false;
 
   // DOM Elements
@@ -51,6 +55,8 @@ class ChronoshiftGame {
   private meterEmp: HTMLElement;
   private meterFrost: HTMLElement;
   private containerFrost: HTMLElement;
+  private meterHyper: HTMLElement;
+  private containerHyper: HTMLElement;
   private overlay: HTMLElement;
   private overlayTitle: HTMLElement;
   private overlaySubtitle: HTMLElement;
@@ -58,6 +64,7 @@ class ChronoshiftGame {
   private sector1Btn: HTMLButtonElement;
   private sector2Btn: HTMLButtonElement;
   private sector3Btn: HTMLButtonElement;
+  private sector4Btn: HTMLButtonElement;
 
   constructor() {
     this.canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
@@ -76,6 +83,8 @@ class ChronoshiftGame {
     this.boss = new ForgeSentinelBoss();
     this.cryo = new CryoManager();
     this.cryoBoss = new CryoArchonBoss();
+    this.slipstream = new SlipstreamManager();
+    this.nemesisBoss = new NemesisRivalBoss();
 
     // Bind DOM
     this.hudScore = document.getElementById('hud-score')!;
@@ -89,6 +98,8 @@ class ChronoshiftGame {
     this.meterEmp = document.getElementById('meter-emp')!;
     this.meterFrost = document.getElementById('meter-frost')!;
     this.containerFrost = document.getElementById('container-frost')!;
+    this.meterHyper = document.getElementById('meter-hyper')!;
+    this.containerHyper = document.getElementById('container-hyperdrive')!;
     this.overlay = document.getElementById('overlay')!;
     this.overlayTitle = document.getElementById('overlay-title')!;
     this.overlaySubtitle = document.getElementById('overlay-subtitle')!;
@@ -96,6 +107,7 @@ class ChronoshiftGame {
     this.sector1Btn = document.getElementById('sector-1-btn') as HTMLButtonElement;
     this.sector2Btn = document.getElementById('sector-2-btn') as HTMLButtonElement;
     this.sector3Btn = document.getElementById('sector-3-btn') as HTMLButtonElement;
+    this.sector4Btn = document.getElementById('sector-4-btn') as HTMLButtonElement;
 
     this.setupListeners();
     this.updateHUD();
@@ -237,9 +249,10 @@ class ChronoshiftGame {
       this.sector1Btn.classList.toggle('sector-btn-active', this.selectedSector === 1);
       this.sector2Btn.classList.toggle('sector-btn-active', this.selectedSector === 2);
       this.sector3Btn.classList.toggle('sector-btn-active', this.selectedSector === 3);
+      this.sector4Btn.classList.toggle('sector-btn-active', this.selectedSector === 4);
     };
 
-    if (this.sector1Btn && this.sector2Btn && this.sector3Btn) {
+    if (this.sector1Btn && this.sector2Btn && this.sector3Btn && this.sector4Btn) {
       this.sector1Btn.addEventListener('click', () => {
         this.selectedSector = 1;
         updateSectorButtons();
@@ -252,6 +265,11 @@ class ChronoshiftGame {
 
       this.sector3Btn.addEventListener('click', () => {
         this.selectedSector = 3;
+        updateSectorButtons();
+      });
+
+      this.sector4Btn.addEventListener('click', () => {
+        this.selectedSector = 4;
         updateSectorButtons();
       });
     }
@@ -270,25 +288,39 @@ class ChronoshiftGame {
     this.dialogue.clear();
     this.gravityField.reset();
     this.cryo.reset();
+    this.slipstream.reset();
     this.boss.active = false;
     this.cryoBoss.active = false;
+    this.nemesisBoss.active = false;
     this.overlay.style.display = 'none';
 
     // Sector specifics
-    if (this.selectedSector === 3) {
+    if (this.selectedSector === 4) {
+      this.containerFrost.style.display = 'none';
+      this.containerHyper.style.display = 'flex';
+      this.dialogue.queueScript('SECTOR4_STREAM_START');
+      // Spawn initial paired wormholes
+      this.slipstream.spawnWormholePair(220, 240, 740, 360);
+      sound.setWaveTempo(1, true); // 155 BPM Darksynth mode!
+    } else if (this.selectedSector === 3) {
       this.containerFrost.style.display = 'flex';
+      this.containerHyper.style.display = 'none';
       this.dialogue.queueScript('SECTOR3_NULL_START');
+      sound.setWaveTempo(1, false);
     } else if (this.selectedSector === 2) {
       this.containerFrost.style.display = 'none';
+      this.containerHyper.style.display = 'none';
       this.gravityField.spawnWell(480, 320, 260, 24, 280, 1.4);
       this.dialogue.queueScript('SECTOR2_FOUNDRY_START');
+      sound.setWaveTempo(1, false);
     } else {
       this.containerFrost.style.display = 'none';
+      this.containerHyper.style.display = 'none';
       this.dialogue.queueScript('SECTOR1_START');
+      sound.setWaveTempo(1, false);
     }
 
     sound.startBGM();
-    sound.setWaveTempo(1);
   }
 
   private gameOver(): void {
@@ -305,13 +337,15 @@ class ChronoshiftGame {
     const sectorNames = {
       1: '01 // PERIMETER',
       2: '02 // FOUNDRY',
-      3: '03 // NULL ZONE'
+      3: '03 // NULL ZONE',
+      4: '04 // SLIPSTREAM'
     };
 
     const sectorColors = {
       1: '#00f3ff',
       2: '#ff6600',
-      3: '#74ebd5'
+      3: '#74ebd5',
+      4: '#facc15'
     };
 
     this.overlayTitle.innerText = 'MISSION FAILED';
@@ -332,7 +366,10 @@ class ChronoshiftGame {
     this.hudHigh.innerText = stats.highScore.toLocaleString();
     this.hudWave.innerText = stats.wave.toString();
 
-    if (currentSector === 3) {
+    if (currentSector === 4) {
+      this.hudSector.innerText = '04 // SLIPSTREAM';
+      this.hudSector.style.color = '#facc15';
+    } else if (currentSector === 3) {
       this.hudSector.innerText = '03 // NULL ZONE';
       this.hudSector.style.color = '#74ebd5';
     } else if (currentSector === 2) {
@@ -372,6 +409,13 @@ class ChronoshiftGame {
       } else {
         this.meterFrost.style.boxShadow = '0 0 8px #74ebd5';
       }
+    } else if (currentSector === 4) {
+      this.meterHyper.style.width = `${Math.round(this.slipstream.hyperDriveCharge)}%`;
+      if (this.slipstream.isSuperluminal) {
+        this.meterHyper.style.boxShadow = '0 0 16px #facc15';
+      } else {
+        this.meterHyper.style.boxShadow = '0 0 8px #a855f7';
+      }
     }
   }
 
@@ -405,6 +449,7 @@ class ChronoshiftGame {
 
       // Update Player & get Time Scale
       const isSubZero = this.state.currentSector === 3;
+      const isSector4 = this.state.currentSector === 4;
       const { timeScale, empTriggered } = this.playerCtrl.update(
         rawDt,
         this.input,
@@ -421,6 +466,44 @@ class ChronoshiftGame {
         if (frozenIds.length > 0) {
           const frozenSet = new Set(frozenIds);
           this.hazardDirector.hazards = this.hazardDirector.hazards.filter((h) => !frozenSet.has(h.id));
+        }
+      }
+
+      // Slipstream & Wormhole Teleport in Sector 4
+      if (isSector4) {
+        const slipResult = this.slipstream.update(
+          rawDt * timeScale,
+          rawDt,
+          this.playerCtrl.player.pos,
+          this.playerCtrl.player.vel,
+          this.playerCtrl.player.radius,
+          this.vfx,
+          sound
+        );
+
+        if (slipResult.teleported && slipResult.teleportExitPos && slipResult.teleportExitVel) {
+          this.playerCtrl.player.pos = slipResult.teleportExitPos;
+          this.playerCtrl.player.vel = slipResult.teleportExitVel;
+          this.vfx.spawnFloatingText('BLACK HOLE ➔ WHITE HOLE!', this.playerCtrl.player.pos, '#facc15', 1.5);
+        }
+
+        if (slipResult.gatePassedCount > 0) {
+          this.state.addScore(1500 * slipResult.gatePassedCount);
+          sound.playWarpGate();
+        }
+
+        // If in Superluminal Warp, minor hazards are pulverized
+        if (this.slipstream.isSuperluminal) {
+          for (let i = this.hazardDirector.hazards.length - 1; i >= 0; i--) {
+            const h = this.hazardDirector.hazards[i];
+            const dist = Math.hypot(this.playerCtrl.player.pos.x - h.pos.x, this.playerCtrl.player.pos.y - h.pos.y);
+            if (dist <= this.playerCtrl.player.radius + h.radius + 15) {
+              this.hazardDirector.hazards.splice(i, 1);
+              this.state.addScore(800);
+              this.vfx.spawnShockwave(h.pos, 60, '#facc15', 4);
+              this.vfx.spawnSparks(h.pos, 14, '#facc15', 200);
+            }
+          }
         }
       }
 
@@ -464,6 +547,15 @@ class ChronoshiftGame {
             this.vfx.spawnFloatingText('CRYO-ARCHON SHATTERED! +40,000', this.cryoBoss.pos, '#74ebd5', 2.2);
           }
         }
+
+        if (this.nemesisBoss.active) {
+          const nemesisKilled = this.nemesisBoss.damage(450, this.vfx, sound);
+          if (nemesisKilled) {
+            this.state.addScore(50000);
+            this.dialogue.queueScript('NEMESIS_DEFEATED');
+            this.vfx.spawnFloatingText('NEMESIS-00 OBLITERATED! +50,000', this.nemesisBoss.pos, '#facc15', 2.4);
+          }
+        }
       }
 
       // Scaled dt for world
@@ -487,6 +579,14 @@ class ChronoshiftGame {
         this.vfx.spawnShockwave(this.cryoBoss.pos, 360, '#74ebd5', 9);
       }
 
+      if (this.state.currentSector === 4 && this.state.stats.wave >= 2 && !this.hasBossSpawnedThisRun) {
+        this.hasBossSpawnedThisRun = true;
+        this.nemesisBoss.spawn(480, 140);
+        this.dialogue.queueScript('NEMESIS_SPAWN');
+        this.vfx.triggerScreenShake(24, 0.8);
+        this.vfx.spawnShockwave(this.nemesisBoss.pos, 380, '#facc15', 10);
+      }
+
       // Environmental physics updates
       if (this.state.currentSector === 2) {
         this.gravityField.update(scaledDt);
@@ -500,10 +600,10 @@ class ChronoshiftGame {
       if (this.state.stats.wave > this.currentTrackedWave) {
         this.currentTrackedWave = this.state.stats.wave;
         sound.playWaveAdvance();
-        sound.setWaveTempo(this.currentTrackedWave);
-        const waveColor = this.state.currentSector === 3 ? '#74ebd5' : this.state.currentSector === 2 ? '#ff6600' : '#00f3ff';
+        sound.setWaveTempo(this.currentTrackedWave, isSector4);
+        const waveColor = isSector4 ? '#facc15' : this.state.currentSector === 3 ? '#74ebd5' : this.state.currentSector === 2 ? '#ff6600' : '#00f3ff';
         this.vfx.spawnFloatingText(
-          `WAVE ${this.currentTrackedWave} - THREAT ELEVATED`,
+          `WAVE ${this.currentTrackedWave} - SPEED ELEVATED`,
           { x: this.canvas.width * 0.5, y: this.canvas.height * 0.3 },
           waveColor,
           1.6
@@ -556,6 +656,39 @@ class ChronoshiftGame {
         }
       }
 
+      if (this.nemesisBoss.active) {
+        const nemResult = this.nemesisBoss.update(
+          scaledDt,
+          rawDt,
+          this.playerCtrl.player,
+          this.playerCtrl.player.isChronoActive,
+          this.slipstream.isSuperluminal,
+          bounds,
+          this.vfx,
+          sound,
+          this.hazardDirector
+        );
+
+        for (let i = 0; i < nemResult.grazes; i++) {
+          const { pointsEarned, newMultiplier } = this.state.registerGraze();
+          this.playerCtrl.onGraze(
+            this.state.config.grazeChronoBonus * 1.8,
+            this.state.config.grazeEmpBonus * 1.8,
+            this.vfx,
+            sound
+          );
+          this.vfx.spawnFloatingText(`NEMESIS GRAZE +${pointsEarned}! (${newMultiplier}x)`, this.playerCtrl.player.pos, '#facc15', 1.2);
+        }
+
+        for (let i = 0; i < nemResult.hits; i++) {
+          const isDead = this.playerCtrl.takeHit(this.vfx, sound);
+          if (isDead) {
+            this.gameOver();
+            break;
+          }
+        }
+      }
+
       // Update hazards & collisions
       const { hits, grazes, coresCollected, collectedPowerUps } = this.hazardDirector.update(
         scaledDt,
@@ -583,6 +716,7 @@ class ChronoshiftGame {
           this.state.addScore(destroyed * 1200);
           if (this.boss.active) this.boss.damage(300, this.vfx, sound);
           if (this.cryoBoss.active) this.cryoBoss.damage(350, this.vfx, sound);
+          if (this.nemesisBoss.active) this.nemesisBoss.damage(400, this.vfx, sound);
           this.vfx.spawnFloatingText(`TACTICAL NUKE PURGE!`, this.playerCtrl.player.pos, '#ffaa00', 1.6);
         }
       }
@@ -644,7 +778,9 @@ class ChronoshiftGame {
     this.ctx.translate(shake.x, shake.y);
 
     // Clear background per Sector
-    if (this.state.currentSector === 3) {
+    if (this.state.currentSector === 4) {
+      this.ctx.fillStyle = '#0a0214'; // Relativistic warp purple
+    } else if (this.state.currentSector === 3) {
       this.ctx.fillStyle = '#020814'; // Glacial midnight
     } else if (this.state.currentSector === 2) {
       this.ctx.fillStyle = '#0d0402'; // Forge dark amber
@@ -661,6 +797,8 @@ class ChronoshiftGame {
       this.gravityField.render(this.ctx);
     } else if (this.state.currentSector === 3) {
       this.cryo.render(this.ctx);
+    } else if (this.state.currentSector === 4) {
+      this.slipstream.render(this.ctx);
     }
 
     // Render world entities
@@ -673,6 +811,10 @@ class ChronoshiftGame {
 
     if (this.cryoBoss.active) {
       this.cryoBoss.render(this.ctx);
+    }
+
+    if (this.nemesisBoss.active) {
+      this.nemesisBoss.render(this.ctx);
     }
 
     if (this.state.mode === 'PLAYING') {
@@ -688,7 +830,9 @@ class ChronoshiftGame {
   private renderGrid(width: number, height: number): void {
     this.ctx.save();
     const sector = this.state.currentSector;
-    if (sector === 3) {
+    if (sector === 4) {
+      this.ctx.strokeStyle = 'rgba(168, 85, 247, 0.08)';
+    } else if (sector === 3) {
       this.ctx.strokeStyle = 'rgba(77, 238, 234, 0.08)';
     } else if (sector === 2) {
       this.ctx.strokeStyle = 'rgba(255, 90, 0, 0.08)';

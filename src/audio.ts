@@ -82,8 +82,60 @@ export class SoundEngine {
     }
   }
 
-  public setWaveTempo(wave: number): void {
-    this.tempoBpm = Math.min(150, 120 + wave * 3);
+  public setWaveTempo(wave: number, isSector4 = false): void {
+    if (isSector4) {
+      this.tempoBpm = Math.min(168, 150 + wave * 3);
+    } else {
+      this.tempoBpm = Math.min(150, 120 + wave * 3);
+    }
+  }
+
+  public playWarpGate(): void {
+    if (this.isMuted) return;
+    const ctx = this.initContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(300, now);
+    osc.frequency.exponentialRampToValueAtTime(1800, now + 0.18);
+
+    gain.gain.setValueAtTime(0.18, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.22);
+  }
+
+  public playTeleport(): void {
+    if (this.isMuted) return;
+    const ctx = this.initContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(900, now);
+    osc.frequency.exponentialRampToValueAtTime(120, now + 0.3);
+
+    gain.gain.setValueAtTime(0.25, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.35);
+
+    this.playNoise(0.2, 0.15, 1200);
   }
 
   private scheduleNextStep(): void {

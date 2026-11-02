@@ -18,7 +18,7 @@ export class GameStateManager {
   public mode: GameMode = 'MENU';
   public stats: GameStats;
   public config: GameConfig;
-  public currentSector: 1 | 2 | 3 = 1;
+  public currentSector: 1 | 2 | 3 | 4 = 1;
 
   constructor(customConfig?: Partial<GameConfig>) {
     this.config = { ...DEFAULT_CONFIG, ...customConfig };
@@ -60,11 +60,11 @@ export class GameStateManager {
     }
   }
 
-  public setSector(sector: 1 | 2 | 3): void {
+  public setSector(sector: 1 | 2 | 3 | 4): void {
     this.currentSector = sector;
   }
 
-  public resetGame(sector?: 1 | 2 | 3): void {
+  public resetGame(sector?: 1 | 2 | 3 | 4): void {
     if (sector !== undefined) {
       this.currentSector = sector;
     }

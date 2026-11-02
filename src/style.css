@@ -252,3 +252,11 @@ p.subtitle {
   box-shadow: 0 0 8px #74ebd5;
   transition: width 0.05s ease-out;
 }
+
+.meter-fill-hyper {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #a855f7, #facc15);
+  box-shadow: 0 0 10px #facc15;
+  transition: width 0.05s ease-out;
+}
