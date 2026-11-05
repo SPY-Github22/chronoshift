@@ -25,6 +25,8 @@ An adrenaline-pumping, retro-cyberpunk arcade evasion game where time bends to y
 
 ## 🕹️ Core Game Mechanics
 
+- **🛡️ Safe Harbor & Ready Staging**: Rounds never begin before you are prepared. Ships spawn in a designated lower safe harbor with a **3.5s Warp Shield** aura and a 200px exclusion zone keeping bosses, gravity wells, and projectiles at bay until you initiate engagement.
+- **⏸️ Tactical Pause Modal**: Pause the action instantly with `P`, `Escape`, or the HUD `⏸ PAUSE` button to inspect wave stats, resume, retry, or abort without penalty.
 - **⚡ Chrono Dilation (Bullet Time)**: Hold `Space` or `Right-Click` to dilate time to 22% speed. Time slows down around you while maintaining snappy ship control.
 - **🎯 Near-Miss Graze System**: Brush dangerously close to lethal hazards without taking a hit to recharge your Chrono Capacitor and build combo multipliers (up to **16x**!).
 - **💥 Tactical EMP Shockwave**: Graze hazards and collect magnetic energy cores to charge your EMP battery. When full, unleash a screen-clearing pulse that vaporizes hazards for cascade points.
@@ -44,6 +46,7 @@ An adrenaline-pumping, retro-cyberpunk arcade evasion game where time bends to y
 | **Move Ship** | `W`, `A`, `S`, `D` or Arrow Keys / Mouse Track | Drag anywhere on screen |
 | **Chrono-Shift (Slow-Mo)** | `Space` or Right-Click | Tap/Hold `⚡ SLOW-MO` button (or 2-finger touch) |
 | **EMP Blast** | `E` or Left-Click (when charged) | Tap `💥 EMP BLAST` button |
+| **Tactical Pause / Resume** | `P` or `Escape` | Tap HUD `⏸ PAUSE` button |
 | **Toggle Audio** | `M` or click HUD Audio Button | Tap `🔊 AUDIO` button |
 
 ---
@@ -52,7 +55,7 @@ An adrenaline-pumping, retro-cyberpunk arcade evasion game where time bends to y
 
 - **Language & Runtime**: TypeScript 5 with strict compilation (`noEmit`, strict nulls, unused locals checking)
 - **Bundler & Dev Server**: Vite 5
-- **Unit Testing**: Vitest test runner (27 unit tests across 6 suites covering vector algebra, state management, gravity wells, cryo mechanics, wormhole slipstreams, and A.P.E.X. Prime multi-phase boss mechanics)
+- **Unit Testing**: Vitest test runner (29 unit tests across 6 suites covering vector algebra, ready/pause state management, gravity wells, cryo mechanics, wormhole slipstreams, and A.P.E.X. Prime multi-phase boss mechanics)
 - **Graphics**: Hardware-accelerated HTML5 Canvas 2D with particle pooling, screen-shake impulse physics, and retro CRT scanline styling
 - **Audio Engine**: Embedded Web Audio API procedural synthesizer (oscillators, biquad filter sweeps, and noise buffers)
 - **CI/CD**: GitHub Actions workflow automatically testing, building, and deploying directly to GitHub Pages on every push to `main`

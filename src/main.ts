@@ -69,6 +69,15 @@ class ChronoshiftGame {
   private sector4Btn: HTMLButtonElement;
   private sector5Btn: HTMLButtonElement;
 
+  // Pause & Ready UI
+  private pauseBtn: HTMLButtonElement;
+  private readyBanner: HTMLElement;
+  private pauseOverlay: HTMLElement;
+  private pauseInfo: HTMLElement;
+  private resumeBtn: HTMLButtonElement;
+  private retryBtn: HTMLButtonElement;
+  private abortBtn: HTMLButtonElement;
+
   constructor() {
     this.canvas = document.getElementById('game-canvas') as HTMLCanvasElement;
     const context = this.canvas.getContext('2d');
@@ -114,6 +123,14 @@ class ChronoshiftGame {
     this.sector4Btn = document.getElementById('sector-4-btn') as HTMLButtonElement;
     this.sector5Btn = document.getElementById('sector-5-btn') as HTMLButtonElement;
 
+    this.pauseBtn = document.getElementById('pause-btn') as HTMLButtonElement;
+    this.readyBanner = document.getElementById('ready-banner')!;
+    this.pauseOverlay = document.getElementById('pause-overlay')!;
+    this.pauseInfo = document.getElementById('pause-info')!;
+    this.resumeBtn = document.getElementById('resume-btn') as HTMLButtonElement;
+    this.retryBtn = document.getElementById('retry-btn') as HTMLButtonElement;
+    this.abortBtn = document.getElementById('abort-btn') as HTMLButtonElement;
+
     this.setupListeners();
     this.updateHUD();
 
@@ -123,6 +140,22 @@ class ChronoshiftGame {
   private setupListeners(): void {
     window.addEventListener('keydown', (e) => {
       const code = e.code;
+
+      if (code === 'KeyP' || code === 'Escape') {
+        this.togglePause();
+        e.preventDefault();
+        return;
+      }
+
+      // If in READY harbor staging, any action key engages warp
+      if (this.state.mode === 'READY') {
+        if (code === 'Space' || code === 'KeyW' || code === 'KeyA' || code === 'KeyS' || code === 'KeyD' ||
+            code === 'ArrowUp' || code === 'ArrowDown' || code === 'ArrowLeft' || code === 'ArrowRight' ||
+            code === 'KeyE' || code === 'Enter') {
+          this.engageWarp();
+        }
+      }
+
       if (code === 'KeyW' || code === 'ArrowUp') this.input.up = true;
       if (code === 'KeyS' || code === 'ArrowDown') this.input.down = true;
       if (code === 'KeyA' || code === 'ArrowLeft') this.input.left = true;
@@ -163,6 +196,9 @@ class ChronoshiftGame {
     });
 
     this.canvas.addEventListener('mousedown', (e) => {
+      if (this.state.mode === 'READY') {
+        this.engageWarp();
+      }
       if (e.button === 0) {
         this.input.triggerEmp = true;
       } else if (e.button === 2) {
@@ -200,6 +236,9 @@ class ChronoshiftGame {
     };
 
     this.canvas.addEventListener('touchstart', (e) => {
+      if (this.state.mode === 'READY') {
+        this.engageWarp();
+      }
       handleTouch(e);
       e.preventDefault();
     }, { passive: false });
@@ -215,6 +254,33 @@ class ChronoshiftGame {
         this.input.chrono = false;
       }
     });
+
+    // Pause HUD & modal controls
+    if (this.pauseBtn) {
+      this.pauseBtn.addEventListener('click', () => {
+        this.togglePause();
+      });
+    }
+
+    if (this.resumeBtn) {
+      this.resumeBtn.addEventListener('click', () => {
+        this.togglePause();
+      });
+    }
+
+    if (this.retryBtn) {
+      this.retryBtn.addEventListener('click', () => {
+        this.pauseOverlay.style.display = 'none';
+        this.pauseBtn.innerText = '⏸ PAUSE [P]';
+        this.startGame();
+      });
+    }
+
+    if (this.abortBtn) {
+      this.abortBtn.addEventListener('click', () => {
+        this.abortToMenu();
+      });
+    }
 
     // Touch buttons & HUD audio
     const muteBtn = document.getElementById('mute-btn');
@@ -290,11 +356,62 @@ class ChronoshiftGame {
     });
   }
 
+  private engageWarp(): void {
+    if (this.state.mode !== 'READY') return;
+    this.state.engageWarp();
+    this.readyBanner.style.display = 'none';
+    this.playerCtrl.player.invulnerableTimer = 3.5;
+    sound.playWarpGate();
+    this.vfx.spawnFloatingText('WARP SHIELD ENGAGED (3.5s)!', this.playerCtrl.player.pos, '#00ff88', 1.8);
+    this.vfx.spawnShockwave(this.playerCtrl.player.pos, 160, '#00ff88', 3);
+    sound.startBGM();
+  }
+
+  private togglePause(): void {
+    if (this.state.mode === 'MENU' || this.state.mode === 'GAMEOVER') return;
+    if (this.state.mode === 'READY') return;
+
+    const isPaused = this.state.togglePause();
+    if (isPaused) {
+      sound.stopBGM();
+      const sectorNames = {
+        1: '01 // PERIMETER',
+        2: '02 // FOUNDRY',
+        3: '03 // NULL ZONE',
+        4: '04 // SLIPSTREAM',
+        5: '05 // SINGULARITY CORE'
+      };
+      const hearts = '♥'.repeat(Math.max(0, this.playerCtrl.player.health)) + '♡'.repeat(Math.max(0, this.playerCtrl.player.maxHealth - this.playerCtrl.player.health));
+      this.pauseInfo.innerText = `SECTOR ${sectorNames[this.state.currentSector]} | WAVE ${this.state.stats.wave} | SCORE ${this.state.stats.score.toLocaleString()} | SHIELDS: ${hearts}`;
+      this.pauseOverlay.style.display = 'flex';
+      this.pauseBtn.innerText = '▶ RESUME [P]';
+    } else {
+      this.pauseOverlay.style.display = 'none';
+      this.pauseBtn.innerText = '⏸ PAUSE [P]';
+      sound.startBGM();
+    }
+  }
+
+  private abortToMenu(): void {
+    this.state.setMode('MENU');
+    sound.stopBGM();
+    this.readyBanner.style.display = 'none';
+    this.pauseOverlay.style.display = 'none';
+    this.overlay.style.display = 'flex';
+    this.pauseBtn.innerText = '⏸ PAUSE [P]';
+  }
+
   private startGame(): void {
-    this.state.resetGame(this.selectedSector);
+    this.state.resetGame(this.selectedSector, true);
     this.currentTrackedWave = 1;
     this.hasBossSpawnedThisRun = false;
-    this.playerCtrl.reset(this.canvas.width * 0.5, this.canvas.height * 0.5);
+
+    // Guaranteed safe harbor spawn position away from hazardous upper arena
+    const spawnX = this.canvas.width * 0.5;
+    const spawnY = this.canvas.height * 0.82;
+    this.playerCtrl.reset(spawnX, spawnY);
+    this.playerCtrl.player.invulnerableTimer = 3.5;
+
     this.hazardDirector.reset();
     this.dialogue.clear();
     this.gravityField.reset();
@@ -305,15 +422,18 @@ class ChronoshiftGame {
     this.nemesisBoss.active = false;
     this.apexPrime.active = false;
     this.overlay.style.display = 'none';
+    this.pauseOverlay.style.display = 'none';
+    this.readyBanner.style.display = 'flex';
+    this.pauseBtn.innerText = '⏸ PAUSE [P]';
 
-    // Sector specifics
+    // Sector specifics - all environmental singularities positioned in upper half
     if (this.selectedSector === 5) {
       this.containerFrost.style.display = 'flex';
       this.containerHyper.style.display = 'flex';
       this.dialogue.queueScript('SECTOR5_CORE_START');
-      this.gravityField.spawnWell(480, 260, 200, 22, 240, 1.3);
-      this.slipstream.spawnWormholePair(180, 240, 780, 360);
-      this.apexPrime.spawn(480, 170);
+      this.gravityField.spawnWell(480, 190, 190, 22, 240, 1.3);
+      this.slipstream.spawnWormholePair(180, 230, 780, 230);
+      this.apexPrime.spawn(480, 150);
       this.dialogue.queueScript('APEX_PRIME_SPAWN');
       this.hasBossSpawnedThisRun = true;
       sound.setWaveTempo(1, true);
@@ -321,7 +441,7 @@ class ChronoshiftGame {
       this.containerFrost.style.display = 'none';
       this.containerHyper.style.display = 'flex';
       this.dialogue.queueScript('SECTOR4_STREAM_START');
-      this.slipstream.spawnWormholePair(220, 240, 740, 360);
+      this.slipstream.spawnWormholePair(200, 230, 760, 230);
       sound.setWaveTempo(1, true);
     } else if (this.selectedSector === 3) {
       this.containerFrost.style.display = 'flex';
@@ -331,7 +451,7 @@ class ChronoshiftGame {
     } else if (this.selectedSector === 2) {
       this.containerFrost.style.display = 'none';
       this.containerHyper.style.display = 'none';
-      this.gravityField.spawnWell(480, 320, 260, 24, 280, 1.4);
+      this.gravityField.spawnWell(480, 190, 230, 22, 260, 1.3);
       this.dialogue.queueScript('SECTOR2_FOUNDRY_START');
       sound.setWaveTempo(1, false);
     } else {
@@ -340,13 +460,14 @@ class ChronoshiftGame {
       this.dialogue.queueScript('SECTOR1_START');
       sound.setWaveTempo(1, false);
     }
-
-    sound.startBGM();
   }
 
   private gameOver(): void {
     this.state.setMode('GAMEOVER');
     sound.stopBGM();
+    this.readyBanner.style.display = 'none';
+    this.pauseOverlay.style.display = 'none';
+    this.pauseBtn.innerText = '⏸ PAUSE [P]';
 
     const { score, wave, grazeCount, empUsedCount } = this.state.stats;
     let rank = 'C';
@@ -850,16 +971,25 @@ class ChronoshiftGame {
       }
 
       this.updateHUD();
+    } else if (this.state.mode === 'READY') {
+      // Keep player centered in safe harbor during staging
+      this.playerCtrl.player.pos.x = this.canvas.width * 0.5;
+      this.playerCtrl.player.pos.y = this.canvas.height * 0.82;
+      this.playerCtrl.player.vel.x = 0;
+      this.playerCtrl.player.vel.y = 0;
+      this.updateHUD();
     }
 
-    // Update Story Dialogue
-    const { playBleep } = this.dialogue.update(rawDt);
-    if (playBleep) {
-      sound.playTransmissionBleep();
-    }
+    if (this.state.mode !== 'PAUSED') {
+      // Update Story Dialogue
+      const { playBleep } = this.dialogue.update(rawDt);
+      if (playBleep) {
+        sound.playTransmissionBleep();
+      }
 
-    // VFX update
-    this.vfx.update(rawDt);
+      // VFX update
+      this.vfx.update(rawDt);
+    }
 
     // Render Frame
     this.render();
@@ -922,8 +1052,43 @@ class ChronoshiftGame {
       this.apexPrime.render(this.ctx);
     }
 
-    if (this.state.mode === 'PLAYING') {
+    if (this.state.mode === 'PLAYING' || this.state.mode === 'READY' || this.state.mode === 'PAUSED') {
       this.playerCtrl.render(this.ctx);
+
+      // Render Safe Harbor Ring during READY mode
+      if (this.state.mode === 'READY') {
+        this.ctx.save();
+        this.ctx.beginPath();
+        this.ctx.arc(this.playerCtrl.player.pos.x, this.playerCtrl.player.pos.y, 48, 0, Math.PI * 2);
+        this.ctx.strokeStyle = '#00ff88';
+        this.ctx.lineWidth = 2.5;
+        this.ctx.setLineDash([8, 6]);
+        this.ctx.shadowColor = '#00ff88';
+        this.ctx.shadowBlur = 16;
+        this.ctx.stroke();
+
+        this.ctx.fillStyle = '#00ff88';
+        this.ctx.font = '11px Courier New, monospace';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('SAFE HARBOR', this.playerCtrl.player.pos.x, this.playerCtrl.player.pos.y + 68);
+        this.ctx.restore();
+      } else if (this.playerCtrl.player.invulnerableTimer > 0) {
+        // Warp Shield Aura while invulnerable
+        this.ctx.save();
+        this.ctx.beginPath();
+        this.ctx.arc(this.playerCtrl.player.pos.x, this.playerCtrl.player.pos.y, 36, 0, Math.PI * 2);
+        this.ctx.strokeStyle = 'rgba(0, 243, 255, 0.85)';
+        this.ctx.lineWidth = 2.5;
+        this.ctx.shadowColor = '#00f3ff';
+        this.ctx.shadowBlur = 14;
+        this.ctx.stroke();
+
+        this.ctx.fillStyle = '#00f3ff';
+        this.ctx.font = '10px Courier New, monospace';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText(`WARP SHIELD ${this.playerCtrl.player.invulnerableTimer.toFixed(1)}s`, this.playerCtrl.player.pos.x, this.playerCtrl.player.pos.y - 42);
+        this.ctx.restore();
+      }
     }
 
     // Render Story Dialogue HUD

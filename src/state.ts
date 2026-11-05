@@ -65,7 +65,7 @@ export class GameStateManager {
     this.currentSector = sector;
   }
 
-  public resetGame(sector?: 1 | 2 | 3 | 4 | 5): void {
+  public resetGame(sector?: 1 | 2 | 3 | 4 | 5, startReady = true): void {
     if (sector !== undefined) {
       this.currentSector = sector;
     }
@@ -77,7 +77,24 @@ export class GameStateManager {
     this.stats.empUsedCount = 0;
     this.stats.survivalTime = 0;
     this.stats.wave = 1;
-    this.mode = 'PLAYING';
+    this.mode = startReady ? 'READY' : 'PLAYING';
+  }
+
+  public engageWarp(): void {
+    if (this.mode === 'READY') {
+      this.mode = 'PLAYING';
+    }
+  }
+
+  public togglePause(): boolean {
+    if (this.mode === 'PLAYING') {
+      this.mode = 'PAUSED';
+      return true;
+    } else if (this.mode === 'PAUSED') {
+      this.mode = 'PLAYING';
+      return false;
+    }
+    return false;
   }
 
   public setMode(newMode: GameMode): void {

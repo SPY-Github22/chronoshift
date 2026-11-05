@@ -6,7 +6,7 @@ describe('GameStateManager & Scoring Engine', () => {
 
   beforeEach(() => {
     state = new GameStateManager();
-    state.resetGame(1);
+    state.resetGame(1, false);
   });
 
   it('initializes with clean default values in Sector 1', () => {
@@ -16,6 +16,41 @@ describe('GameStateManager & Scoring Engine', () => {
     expect(state.stats.comboCount).toBe(0);
     expect(state.stats.wave).toBe(1);
     expect(state.mode).toBe('PLAYING');
+  });
+
+  it('supports READY staging mode and engages warp on player readiness', () => {
+    state.resetGame(2, true);
+    expect(state.mode).toBe('READY');
+    expect(state.currentSector).toBe(2);
+
+    // Updates should not advance survival time while READY
+    state.update(2.0);
+    expect(state.stats.survivalTime).toBe(0);
+
+    // Engaging warp transitions cleanly to PLAYING
+    state.engageWarp();
+    expect(state.mode).toBe('PLAYING');
+
+    state.update(1.0);
+    expect(state.stats.survivalTime).toBe(1.0);
+  });
+
+  it('toggles pause state cleanly and halts time progression while paused', () => {
+    expect(state.mode).toBe('PLAYING');
+    const isPaused = state.togglePause();
+    expect(isPaused).toBe(true);
+    expect(state.mode).toBe('PAUSED');
+
+    // Time should not advance while PAUSED
+    state.update(5.0);
+    expect(state.stats.survivalTime).toBe(0);
+
+    const isResumed = state.togglePause();
+    expect(isResumed).toBe(false);
+    expect(state.mode).toBe('PLAYING');
+
+    state.update(2.0);
+    expect(state.stats.survivalTime).toBe(2.0);
   });
 
   it('scales score multipliers dynamically with consecutive grazes up to 16x', () => {

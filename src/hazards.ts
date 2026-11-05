@@ -8,6 +8,7 @@ export class HazardDirector {
   public cores: EnergyCore[] = [];
   public powerups: PowerUpItem[] = [];
   private nextId = 1;
+  private initialGraceTimer = 2.5;
   private spawnTimer = 0;
   private laserTimer = 0;
   private coreTimer = 0;
@@ -17,6 +18,7 @@ export class HazardDirector {
     this.hazards = [];
     this.cores = [];
     this.powerups = [];
+    this.initialGraceTimer = 2.5;
     this.spawnTimer = 0;
     this.laserTimer = 0;
     this.coreTimer = 0;
@@ -37,27 +39,31 @@ export class HazardDirector {
     let coresCollected = 0;
     const collectedPowerUps: PowerUpType[] = [];
 
-    // 1. Spawning Director based on wave
-    this.spawnTimer += scaledDt;
-    const baseSpawnInterval = Math.max(0.35, 1.4 - wave * 0.12);
-    if (this.spawnTimer >= baseSpawnInterval) {
-      this.spawnTimer = 0;
-      this.spawnOrbHazard(bounds, wave);
+    // 1. Spawning Director with initial spawn grace period
+    if (this.initialGraceTimer > 0) {
+      this.initialGraceTimer -= realDt;
+    } else {
+      this.spawnTimer += scaledDt;
+      const baseSpawnInterval = Math.max(0.35, 1.4 - wave * 0.12);
+      if (this.spawnTimer >= baseSpawnInterval) {
+        this.spawnTimer = 0;
+        this.spawnOrbHazard(bounds, wave, player.pos);
 
-      if (wave >= 2 && Math.random() < 0.35) {
-        this.spawnSeekerHazard(bounds, player.pos);
+        if (wave >= 2 && Math.random() < 0.35) {
+          this.spawnSeekerHazard(bounds, player.pos);
+        }
+        if (wave >= 3 && Math.random() < 0.25) {
+          this.spawnPulsarHazard(bounds, player.pos);
+        }
       }
-      if (wave >= 3 && Math.random() < 0.25) {
-        this.spawnPulsarHazard(bounds);
-      }
-    }
 
-    // Laser telegraph spawning
-    this.laserTimer += scaledDt;
-    const laserInterval = Math.max(3.0, 7.0 - wave * 0.4);
-    if (this.laserTimer >= laserInterval && wave >= 2) {
-      this.laserTimer = 0;
-      this.spawnLaserHazard(bounds, audio);
+      // Laser telegraph spawning
+      this.laserTimer += scaledDt;
+      const laserInterval = Math.max(3.0, 7.0 - wave * 0.4);
+      if (this.laserTimer >= laserInterval && wave >= 2) {
+        this.laserTimer = 0;
+        this.spawnLaserHazard(bounds, audio);
+      }
     }
 
     // Energy core spawning
@@ -250,7 +256,7 @@ export class HazardDirector {
     return destroyedCount;
   }
 
-  private spawnOrbHazard(bounds: { width: number; height: number }, wave: number): void {
+  private spawnOrbHazard(bounds: { width: number; height: number }, wave: number, playerPos?: Vector2D): void {
     const radius = randomRange(7, 13);
     // Spawn along border
     const edge = Math.floor(Math.random() * 4);
@@ -262,7 +268,10 @@ export class HazardDirector {
     else { x = -radius; y = randomRange(0, bounds.height); }
 
     const speed = randomRange(120, 180 + wave * 15);
-    const target = vecCreate(randomRange(bounds.width * 0.2, bounds.width * 0.8), randomRange(bounds.height * 0.2, bounds.height * 0.8));
+    let target = vecCreate(randomRange(bounds.width * 0.2, bounds.width * 0.8), randomRange(bounds.height * 0.2, bounds.height * 0.8));
+    if (playerPos && vecDistance(target, playerPos) < 180) {
+      target = vecCreate(bounds.width * 0.5, bounds.height * 0.2);
+    }
     const vel = vecScale(vecNormalize(vecSub(target, vecCreate(x, y))), speed);
 
     const colors = ['#ff0055', '#ff4400', '#ff00bb', '#ffaa00'];
@@ -339,11 +348,21 @@ export class HazardDirector {
     laser.p2 = vecAdd(center, dir);
   }
 
-  private spawnPulsarHazard(bounds: { width: number; height: number }): void {
-    const pos = vecCreate(
+  private spawnPulsarHazard(bounds: { width: number; height: number }, playerPos?: Vector2D): void {
+    let pos = vecCreate(
       randomRange(bounds.width * 0.25, bounds.width * 0.75),
       randomRange(bounds.height * 0.25, bounds.height * 0.75)
     );
+    if (playerPos) {
+      let attempts = 0;
+      while (vecDistance(pos, playerPos) < 220 && attempts < 10) {
+        pos = vecCreate(
+          randomRange(bounds.width * 0.15, bounds.width * 0.85),
+          randomRange(bounds.height * 0.15, bounds.height * 0.85)
+        );
+        attempts++;
+      }
+    }
     this.hazards.push({
       id: this.nextId++,
       type: 'PULSAR',

@@ -24,6 +24,7 @@
       </div>
       <div class="hud-panel" style="align-items: flex-end;">
         <div style="display: flex; gap: 8px; align-items: center;">
+          <button id="pause-btn" class="hud-btn" style="border-color: #facc15; color: #facc15;">⏸ PAUSE [P]</button>
           <button id="mute-btn" class="hud-btn">🔊 AUDIO [M]</button>
           <div>SHIELDS: <span id="hud-health">♥♥♥</span></div>
         </div>
@@ -50,6 +51,28 @@
     <div id="touch-controls">
       <button id="touch-chrono-btn" class="touch-btn">⚡ SLOW-MO</button>
       <button id="touch-emp-btn" class="touch-btn">💥 EMP BLAST</button>
+    </div>
+
+    <!-- Ready staging banner -->
+    <div id="ready-banner" style="display: none;">
+      <div class="ready-box">
+        <div class="ready-badge">WARP HARBOR SECURE</div>
+        <div class="ready-text">CLICK SCREEN OR PRESS [SPACE / WASD] TO ENGAGE</div>
+        <div class="ready-hint">SAFE ZONE ACTIVE &bull; 3s WARP SHIELD CHARGED</div>
+      </div>
+    </div>
+
+    <!-- Tactical Pause Modal Overlay -->
+    <div id="pause-overlay" style="display: none;">
+      <div class="pause-box">
+        <h2 class="pause-title">// TACTICAL PAUSE //</h2>
+        <div id="pause-info" class="pause-info">SECTOR 01 | WAVE 1 | SHIELDS: ♥♥♥</div>
+        <div class="pause-actions">
+          <button id="resume-btn" class="btn-primary">▶ RESUME MISSION [P]</button>
+          <button id="retry-btn" class="btn-secondary">🔄 RETRY SECTOR</button>
+          <button id="abort-btn" class="btn-secondary">⏹ ABORT TO MISSION SELECT</button>
+        </div>
+      </div>
     </div>
 
     <div id="overlay">

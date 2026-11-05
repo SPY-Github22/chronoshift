@@ -3,7 +3,7 @@ export interface Vector2D {
   y: number;
 }
 
-export type GameMode = 'MENU' | 'PLAYING' | 'PAUSED' | 'GAMEOVER';
+export type GameMode = 'MENU' | 'READY' | 'PLAYING' | 'PAUSED' | 'GAMEOVER';
 
 export interface Player {
   pos: Vector2D;
